@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
-require 'rubygems'
-require 'passivedns-client'
+require 'passivedns/client'
 require 'structformatter'
 require 'getoptlong'
 require 'yaml'
