@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 	spec.email         = ["rubygems@chrislee.dhs.org"]
 	spec.description   = %q{This provides interfaces to various passive DNS databases to do the query and to normalize the responses.  The query tool also allows for recursive queries, using an SQLite3 database to keep state.}
 	spec.summary       = %q{Query passive DNS databases}
-	spec.homepage      = "https://github.com/chrislee35/passive-dns"
+	spec.homepage      = "https://github.com/chrislee35/passivedns-client"
 	spec.license       = "MIT"
 
 	spec.files         = `git ls-files`.split($/)
