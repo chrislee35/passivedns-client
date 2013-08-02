@@ -7,7 +7,7 @@ require 'net/https'
 module PassiveDNS
 	class ISC
 		attr_accessor :debug
-		@@base="https://dnsdb-api.isc.org/lookup"
+		@@base="https://api.dnsdb.info/lookup"
 		
 		def initialize(config="#{ENV['HOME']}/.isc-dnsdb-query.conf")
 			@debug = false
