@@ -1,6 +1,6 @@
 # PassiveDNS::Client
 
-This rubygem queries 5 major Passive DNS databases: BFK, CERTEE, DNSParse, ISC, and VirusTotal.
+This rubygem queries 5 major Passive DNS databases: BFK, CERTEE, DNSParse, DNSDB, and VirusTotal.
 Passive DNS is a technique where IP to hostname mappings are made by recording the answers of other people's queries.  
 
 There is a tool included, pdnstool, that wraps a lot of the functionality that you would need.
