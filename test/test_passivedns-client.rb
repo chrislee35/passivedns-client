@@ -36,10 +36,10 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 		end
 	end
 	
-	def test_instantiate_ISC_Client
-		assert_not_nil(PassiveDNS::ISC.new)
+	def test_instantiate_DNSDB_Client
+		assert_not_nil(PassiveDNS::DNSDB.new)
 		assert_nothing_raised do
-			PassiveDNS::Client.new(['isc'])
+			PassiveDNS::Client.new(['dnsdb'])
 		end
 	end
 	
@@ -97,8 +97,8 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 		assert_not_nil(rows.to_yaml)
 	end
 
-	def test_query_ISC
-		rows = PassiveDNS::ISC.new.lookup("example.org")
+	def test_query_DNSDB
+		rows = PassiveDNS::DNSDB.new.lookup("example.org")
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)

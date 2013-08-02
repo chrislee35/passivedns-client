@@ -6,7 +6,7 @@ require "passivedns/client/version"
 require 'passivedns/client/bfk.rb'
 require 'passivedns/client/certee.rb'
 require 'passivedns/client/dnsparse.rb'
-require 'passivedns/client/isc.rb'
+require 'passivedns/client/dnsdb.rb'
 require 'passivedns/client/virustotal.rb'
 require 'passivedns/client/state.rb'
 
@@ -15,7 +15,7 @@ module PassiveDNS
 	class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count); end
 
 	class Client
-		def initialize(pdns=['bfk','certee','dnsparse','isc','virustotal'])
+		def initialize(pdns=['bfk','certee','dnsparse','dnsdb','virustotal'])
 			@pdnsdbs = []
 			pdns.uniq.each do |pd|
 				case pd
@@ -25,8 +25,10 @@ module PassiveDNS
 					@pdnsdbs << PassiveDNS::CERTEE.new
 				when 'dnsparse'
 					@pdnsdbs << PassiveDNS::DNSParse.new
+				when 'dnsdb'
+					@pdnsdbs << PassiveDNS::DNSDB.new
 				when 'isc'
-					@pdnsdbs << PassiveDNS::ISC.new
+					@pdnsdbs << PassiveDNS::DNSDB.new
 				when 'virustotal'
 					@pdnsdbs << PassiveDNS::VirusTotal.new
 				else

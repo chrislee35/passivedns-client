@@ -55,7 +55,7 @@ require 'yaml'
 		puts "  -b only use BFK"
 		puts "  -e only use CERT-EE"
 		puts "  -d only use DNSParse (default)"
-		puts "  -i only use ISC"
+		puts "  -i only use DNSDB (formerly ISC)"
 		puts "  -V only use VirusTotal"
 		puts ""
 		puts "  -g outputs a link-nodal GDF visualization definition"
@@ -121,7 +121,7 @@ require 'yaml'
 			pdnsdbs << "bfk"
 			pdnsdbs << "certee"
 			pdnsdbs << "dnsparse"
-			pdnsdbs << "isc"
+			pdnsdbs << "dnsdb"
 			pdnsdbs << "virustotal"
 		when '--bfk'
 			pdnsdbs << "bfk"
@@ -130,7 +130,7 @@ require 'yaml'
 		when '--dnsparse'
 			pdnsdbs << "dnsparse"
 		when '--isc'
-			pdnsdbs << "isc"
+			pdnsdbs << "dnsdb"
 		when '--virustotal'
 			pdnsdbs << "virustotal"
 		when '--gdf'

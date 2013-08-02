@@ -27,7 +27,7 @@ Or install it yourself as:
 
 	require 'passivedns-client'
 	
-	c = PassiveDNS::Client.new(['bfk','isc']) # providers: bfk, dnsparse, certee, isc, virustotal
+	c = PassiveDNS::Client.new(['bfk','dnsdb']) # providers: bfk, dnsparse, certee, dnsdb, virustotal
 	results = c.query("example.com")
 	
 Or use the included tool!
@@ -37,7 +37,7 @@ Or use the included tool!
 	  -b only use BFK
 	  -e only use CERT-EE
 	  -d only use DNSParse (default)
-	  -i only use ISC
+	  -i only use DNSDB (formerly ISC)
 	  -V only use VirusTotal
 
 	  -g outputs a link-nodal GDF visualization definition
