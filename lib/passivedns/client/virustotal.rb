@@ -11,7 +11,7 @@ module PassiveDNS
 				@apikey = File.open(config).read.split(/\n/)[0]
 				$stderr.puts "DEBUG: VirusTotal#initialize(#{@apikey})" if @debug
 			else
-				raise "Configuration file for VirusTotal is required for intialization\nFormat of configuration file (default: #{ENV['HOME']}/.apikey) is:\n<url>\n<apikey>\n"
+				raise "Configuration file for VirusTotal is required for intialization\nFormat of configuration file (default: #{ENV['HOME']}/.virustotal) is the 64 hex character apikey on one line."
 			end
 		end
 

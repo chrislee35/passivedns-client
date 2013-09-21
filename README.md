@@ -23,6 +23,38 @@ Or install it yourself as:
 
     $ gem install passivedns-client
 
+## Configuration
+
+### DNSParse
+
+The pdnstool looks for a configuration file for DNSParse to be located at $HOME/.dnsparse by default. It requires three items of information, one per line: the base URL, a username, and a password. E.g.,
+
+  https://dnsparse.wherever/query.php?submit=Search&format=json&querytext=
+  myusername
+  mypassword
+
+### DNSDB (Farsight Security)
+
+The DNSDB configuration file is located at $HOME/.dnsdb-query.conf by default. The format for its configuration file only requires one line in the following format:
+
+  APIKEY="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+
+To request an API Key, please read https://api.dnsdb.info/.
+
+### CERTEE
+
+CERT-EE does not require any configuration.
+BFK.de
+
+BFK.de does not require any configuration. However, please read and abide by their usage policy at BFK.de. Currently, it just says not to perform automated queries.
+
+### VirusTotal
+
+VirusTotal's  (https://www.virustotal.com) passive DNS database requires an apikey in $HOME/.virustotal.  It is a 64 character hexstring on a single line.
+
+  01234567890abcdef01234567890abcdef01234567890abcdef01234567890abcdef
+
+
 ## Usage
 
 	require 'passivedns-client'

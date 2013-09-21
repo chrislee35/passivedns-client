@@ -1,6 +1,6 @@
 # DESCRIPTION: this is a module for pdns.rb, primarily used by pdnstool.rb, to query the Farsight Security passive DNS database
-# details on the API are at https://dnsdb.isc.org/doc/isc-dnsdb-api.html
-# to request an API key, please email dnsdb@isc.org
+# details on the API are at https://api.dnsdb.info/
+# to request an API key, please email dnsdb-api at farsightsecurity dot com.
 require 'net/http'
 require 'net/https'
 
@@ -9,7 +9,7 @@ module PassiveDNS
 		attr_accessor :debug
 		@@base="https://api.dnsdb.info/lookup"
 		
-		def initialize(config="#{ENV['HOME']}/.isc-dnsdb-query.conf")
+		def initialize(config="#{ENV['HOME']}/.dnsdb-query.conf")
 			@debug = false
 			if File.exist?(config)
 				@key = File.open(config).readline.chomp
@@ -18,10 +18,10 @@ module PassiveDNS
 				elsif @key =~ /^APIKEY=\"([0-9a-f]{64})\"/
 					@key = $1
 				else
-					raise "Format of configuration file (default: #{ENV['HOME']}/.isc-dnsdb-query.conf) is:\nAPIKEY=\"<key>\"\nE.g.,\nAPIKEY=\"d41d8cd98f00b204e9800998ecf8427ed41d8cd98f00b204e9800998ecf8427e\"\n"
+					raise "Format of configuration file (default: #{ENV['HOME']}/.dnsdb-query.conf) is:\nAPIKEY=\"<key>\"\nE.g.,\nAPIKEY=\"d41d8cd98f00b204e9800998ecf8427ed41d8cd98f00b204e9800998ecf8427e\"\n"
 				end
 			else
-				raise "Configuration file for DNSDB is required for intialization\nFormat of configuration file (default: #{ENV['HOME']}/.isc-dnsdb-query.conf) is:\nAPIKEY=\"<key>\"\nE.g.,\nAPIKEY=\"d41d8cd98f00b204e9800998ecf8427ed41d8cd98f00b204e9800998ecf8427e\"\n"
+				raise "Configuration file for DNSDB is required for intialization\nFormat of configuration file (default: #{ENV['HOME']}/.dnsdb-query.conf) is:\nAPIKEY=\"<key>\"\nE.g.,\nAPIKEY=\"d41d8cd98f00b204e9800998ecf8427ed41d8cd98f00b204e9800998ecf8427e\"\n"
 			end
 		end
 
