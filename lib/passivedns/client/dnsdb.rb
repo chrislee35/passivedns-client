@@ -48,7 +48,7 @@ module PassiveDNS
 			raise e
 		end
 
-		def lookup(label)
+		def lookup(label, limit=nil)
 			$stderr.puts "DEBUG: DNSDB.lookup(#{label})" if @debug
 			Timeout::timeout(240) {
 				url = nil
@@ -63,14 +63,18 @@ module PassiveDNS
 				http.use_ssl = (url.scheme == 'https')
 				http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 				http.verify_depth = 5
-				request = Net::HTTP::Get.new(url.path)
+        path = url.path
+        if limit
+          path << "?limit=#{limit}"
+        end
+				request = Net::HTTP::Get.new(path)
 				request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
 				request.add_field("X-API-Key", @key)
 				request.add_field("Accept", "application/json")
 				t1 = Time.now
 				response = http.request(request)
 				t2 = Time.now
-				$stderr.puts response if @debug
+				$stderr.puts response.body if @debug
 				parse_json(response.body,t2-t1)
 			}
 		rescue Timeout::Error => e

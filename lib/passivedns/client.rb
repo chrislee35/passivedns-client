@@ -8,6 +8,7 @@ require 'passivedns/client/certee.rb'
 require 'passivedns/client/dnsparse.rb'
 require 'passivedns/client/dnsdb.rb'
 require 'passivedns/client/virustotal.rb'
+#require 'passivedns/client/tcpiputils.rb'
 require 'passivedns/client/state.rb'
 
 module PassiveDNS
@@ -15,6 +16,7 @@ module PassiveDNS
 	class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count); end
 
 	class Client
+		#def initialize(pdns=['bfk','certee','dnsparse','dnsdb','virustotal','tcpiputils'])
 		def initialize(pdns=['bfk','certee','dnsparse','dnsdb','virustotal'])
 			@pdnsdbs = []
 			pdns.uniq.each do |pd|
@@ -31,6 +33,8 @@ module PassiveDNS
 					@pdnsdbs << PassiveDNS::DNSDB.new
 				when 'virustotal'
 					@pdnsdbs << PassiveDNS::VirusTotal.new
+        #when 'tcpiputils'
+				#	@pdnsdbs << PassiveDNS::TCPIPUtils.new
 				else
 					raise "Unknown Passive DNS provider: #{pd}"
 				end
@@ -43,11 +47,11 @@ module PassiveDNS
 			end
 		end
 		
-		def query(item)
+		def query(item, limit=nil)
 			threads = []
 			@pdnsdbs.each do |pdnsdb|
 				threads << Thread.new(item) do |q|
-					pdnsdb.lookup(q)
+					pdnsdb.lookup(q, limit)
 				end
 			end
 				

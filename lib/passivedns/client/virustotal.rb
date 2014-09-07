@@ -34,7 +34,7 @@ module PassiveDNS
 			raise e
 		end
 
-		def lookup(label)
+		def lookup(label, limit=nil)
 			$stderr.puts "DEBUG: VirusTotal.lookup(#{label})" if @debug
 			Timeout::timeout(240) {
 				url = nil
@@ -54,7 +54,12 @@ module PassiveDNS
 				t1 = Time.now
 				response = http.request(request)
 				t2 = Time.now
-				parse_json(response.body, label, t2-t1)
+				recs = parse_json(response.body, label, t2-t1)
+        if limit
+          recs[0,limit]
+        else
+          recs
+        end
 			}
 		rescue Timeout::Error => e
 			$stderr.puts "VirusTotal lookup timed out: #{label}"

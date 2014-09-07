@@ -52,13 +52,16 @@ module PassiveDNS
 			raise e
 		end
 
-		def lookup(label)
+		def lookup(label, limit=nil)
 			$stderr.puts "DEBUG: DNSParse.lookup(#{label})" if @debug
 			Timeout::timeout(240) {
 				year = Time.now.strftime("%Y").to_i
 				month = Time.now.strftime("%m").to_i
-				url = "#{@base}#{label}&year=#{year - 1}"
-				url = "#{@base}#{label}&year=#{year}" if month > 3
+        if month < 3
+          year -= 1
+        end
+        year = 2013 # until I get some confirmation that the service is staying current
+				url = "#{@base}#{label}&year=#{year}"
 				if label =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2}$/
 					url.gsub!(/query\.php/,'cidr.php')
 				elsif label =~ /\*$/
@@ -76,11 +79,17 @@ module PassiveDNS
 				t1 = Time.now
 				response = http.request(request)
 				t2 = Time.now
+        recs = []
 				if @base =~ /format=json/
-					parse_json(response.body,t2-t1)
+					recs = parse_json(response.body,t2-t1)
 				else
-					parse_html(response.body,t2-t1)
+					recs = parse_html(response.body,t2-t1)
 				end
+        if limit
+          recs[0,limit]
+        else
+          recs
+        end
 			}
 		rescue Timeout::Error => e
 			$stderr.puts "DNSParse lookup timed out: #{label}"

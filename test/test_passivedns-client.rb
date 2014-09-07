@@ -15,41 +15,6 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 		end
 	end
 
-	def test_instantiate_BFK_Client
-		assert_not_nil(PassiveDNS::BFK.new)
-		assert_nothing_raised do
-			PassiveDNS::Client.new(['bfk'])
-		end
-	end
-
-	def test_instantiate_CERTEE_Client
-		assert_not_nil(PassiveDNS::CERTEE.new)
-		assert_nothing_raised do
-			PassiveDNS::Client.new(['certee'])
-		end
-	end
-	
-	def test_instantiate_DNSParse_Client
-		assert_not_nil(PassiveDNS::DNSParse.new)
-		assert_nothing_raised do
-			PassiveDNS::Client.new(['dnsparse'])
-		end
-	end
-	
-	def test_instantiate_DNSDB_Client
-		assert_not_nil(PassiveDNS::DNSDB.new)
-		assert_nothing_raised do
-			PassiveDNS::Client.new(['dnsdb'])
-		end
-	end
-	
-	def test_instantiate_VirusTotal_Client
-		assert_not_nil(PassiveDNS::VirusTotal.new)
-		assert_nothing_raised do
-			PassiveDNS::Client.new(['virustotal'])
-		end
-	end
-
 	def test_instantiate_All_Clients
 		assert_nothing_raised do
 			PassiveDNS::Client.new()
@@ -70,49 +35,123 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 		end
 	end
 	
-	def test_query_BFK
+	def test_BFK
+		assert_not_nil(PassiveDNS::BFK.new)
+		assert_nothing_raised do
+			PassiveDNS::Client.new(['bfk'])
+		end
 		rows = PassiveDNS::BFK.new.lookup("example.org")
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
+		rows = PassiveDNS::BFK.new.lookup("example.org",3)
+		assert_not_nil(rows)
+		assert_not_nil(rows.to_s)
+		assert_not_nil(rows.to_xml)
+		assert_not_nil(rows.to_json)
+		assert_not_nil(rows.to_yaml)
+    assert_equal(3, rows.length)
 	end
 	
-	def test_query_CERTEE
+	def test_CERTEE
+		assert_not_nil(PassiveDNS::CERTEE.new)
+		assert_nothing_raised do
+			PassiveDNS::Client.new(['certee'])
+		end
 		rows = PassiveDNS::CERTEE.new.lookup("sim.cert.ee")
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
+		rows = PassiveDNS::CERTEE.new.lookup("sim.cert.ee",3)
+		assert_not_nil(rows)
+		assert_not_nil(rows.to_s)
+		assert_not_nil(rows.to_xml)
+		assert_not_nil(rows.to_json)
+		assert_not_nil(rows.to_yaml)
+    assert_equal(3, rows.length)
 	end
 
-	def test_query_DNSParse
+	def test_DNSParse
+		assert_not_nil(PassiveDNS::DNSParse.new)
+		assert_nothing_raised do
+			PassiveDNS::Client.new(['dnsparse'])
+		end
 		rows = PassiveDNS::DNSParse.new.lookup("example.org")
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
+		rows = PassiveDNS::DNSParse.new.lookup("example.org",3)
+		assert_not_nil(rows)
+		assert_not_nil(rows.to_s)
+		assert_not_nil(rows.to_xml)
+		assert_not_nil(rows.to_json)
+		assert_not_nil(rows.to_yaml)
+    assert_equal(3, rows.length)
 	end
 
-	def test_query_DNSDB
+	def test_DNSDB
+		assert_not_nil(PassiveDNS::DNSDB.new)
+		assert_nothing_raised do
+			PassiveDNS::Client.new(['dnsdb'])
+		end
 		rows = PassiveDNS::DNSDB.new.lookup("example.org")
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
+		rows = PassiveDNS::DNSDB.new.lookup("example.org",3)
+		assert_not_nil(rows)
+		assert_not_nil(rows.to_s)
+		assert_not_nil(rows.to_xml)
+		assert_not_nil(rows.to_json)
+		assert_not_nil(rows.to_yaml)
+    assert_equal(3, rows.length) # this will fail since DNSDB has an off by one error
 	end
 
-	def test_query_VirusTotal
+	def test_VirusTotal
+		assert_not_nil(PassiveDNS::VirusTotal.new)
+		assert_nothing_raised do
+			PassiveDNS::Client.new(['virustotal'])
+		end
 		rows = PassiveDNS::VirusTotal.new.lookup("sim.cert.ee")
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
+		rows = PassiveDNS::VirusTotal.new.lookup("google.com",3)
+		assert_not_nil(rows)
+		assert_not_nil(rows.to_s)
+		assert_not_nil(rows.to_xml)
+		assert_not_nil(rows.to_json)
+		assert_not_nil(rows.to_yaml)
+    assert_equal(3, rows.length)
 	end
-
+  
+  def test_TCPIPUtils
+    assert_not_nil(PassiveDNS::TCPIPUtils.new)
+    assert_nothing_raised do
+      PassiveDNS::Client.new(['tcpiputils'])
+    end
+    rows = PassiveDNS::TCPIPUtils.new.lookup("example.org")
+    assert_not_nil(rows)
+    assert_not_nil(rows.to_s)
+    assert_not_nil(rows.to_xml)
+    assert_not_nil(rows.to_json)
+    assert_not_nil(rows.to_yaml)
+    rows = PassiveDNS::TCPIPUtils.new.lookup("example.org",3)
+    assert_not_nil(rows)
+    assert_not_nil(rows.to_s)
+    assert_not_nil(rows.to_xml)
+    assert_not_nil(rows.to_json)
+    assert_not_nil(rows.to_yaml)
+    assert_equal(3, rows.length)
+  end
 end

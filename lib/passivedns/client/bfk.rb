@@ -38,7 +38,7 @@ module PassiveDNS
 			raise e
 		end
 
-		def lookup(label)	
+		def lookup(label, limit=nil)	
 			$stderr.puts "DEBUG: BFKClient.lookup(#{label})" if @debug
 			Timeout::timeout(240) {
 				t1 = Time.now
@@ -48,7 +48,12 @@ module PassiveDNS
 					:http_basic_authentication => [@user,@pass]
 				) do |f|
 					t2 = Time.now
-					parse(f.read,t2-t1)
+					recs = parse(f.read,t2-t1)
+          if limit
+            recs[0,limit]
+          else
+            recs
+          end
 				end
 			}
 		rescue Timeout::Error => e

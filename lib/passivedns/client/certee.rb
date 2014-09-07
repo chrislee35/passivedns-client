@@ -6,7 +6,7 @@ module PassiveDNS
 		attr_accessor :debug
 		def initialize
 		end
-		def lookup(label)
+		def lookup(label, limit=nil)
 			$stderr.puts "DEBUG: CERTEE.lookup(#{label})" if @debug
 			recs = []
 			begin
@@ -14,6 +14,10 @@ module PassiveDNS
 				s = TCPSocket.new(@@host,43)
 				s.puts(label)
 				s.each_line do |l|
+          if l =~ /Traceback \(most recent call last\):/
+            # there is a bug in the CERTEE lookup tool
+            raise "CERTEE is currently offline"
+          end
 					(lbl,ans,fs,ls) = l.chomp.split(/\t/)
 					rrtype = 'A'
 					if ans =~ /^\d+\.\d+\.\d+\.\d+$/
@@ -30,7 +34,11 @@ module PassiveDNS
 				$stderr.puts e
 			end
 			return nil unless recs.length > 0
-			recs
-		end	
+      if limit
+        recs = recs[0,limit]
+      else
+        recs
+      end
+		end
 	end
 end
