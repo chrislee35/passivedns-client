@@ -40,12 +40,6 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 		assert_nothing_raised do
 			PassiveDNS::Client.new(['bfk'])
 		end
-		rows = PassiveDNS::BFK.new.lookup("example.org")
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
 		rows = PassiveDNS::BFK.new.lookup("example.org",3)
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
@@ -56,37 +50,12 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 	end
 	
 	def test_CERTEE
+    assert(false, "CERTEE is still offline")
 		assert_not_nil(PassiveDNS::CERTEE.new)
 		assert_nothing_raised do
 			PassiveDNS::Client.new(['certee'])
 		end
-		rows = PassiveDNS::CERTEE.new.lookup("sim.cert.ee")
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
 		rows = PassiveDNS::CERTEE.new.lookup("sim.cert.ee",3)
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
-    assert_equal(3, rows.length)
-	end
-
-	def test_DNSParse
-		assert_not_nil(PassiveDNS::DNSParse.new)
-		assert_nothing_raised do
-			PassiveDNS::Client.new(['dnsparse'])
-		end
-		rows = PassiveDNS::DNSParse.new.lookup("example.org")
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
-		rows = PassiveDNS::DNSParse.new.lookup("example.org",3)
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)
@@ -100,12 +69,6 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 		assert_nothing_raised do
 			PassiveDNS::Client.new(['dnsdb'])
 		end
-		rows = PassiveDNS::DNSDB.new.lookup("example.org")
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
 		rows = PassiveDNS::DNSDB.new.lookup("example.org",3)
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
@@ -120,12 +83,6 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 		assert_nothing_raised do
 			PassiveDNS::Client.new(['virustotal'])
 		end
-		rows = PassiveDNS::VirusTotal.new.lookup("sim.cert.ee")
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
 		rows = PassiveDNS::VirusTotal.new.lookup("google.com",3)
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)

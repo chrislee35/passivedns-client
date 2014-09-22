@@ -5,10 +5,9 @@ require "passivedns/client/version"
 # Remember, these passive DNS operators are my friends.  I don't want to have a row with them because some asshat used this library to abuse them.
 require 'passivedns/client/bfk.rb'
 require 'passivedns/client/certee.rb'
-require 'passivedns/client/dnsparse.rb'
 require 'passivedns/client/dnsdb.rb'
 require 'passivedns/client/virustotal.rb'
-#require 'passivedns/client/tcpiputils.rb'
+require 'passivedns/client/tcpiputils.rb'
 require 'passivedns/client/state.rb'
 
 module PassiveDNS
@@ -16,8 +15,7 @@ module PassiveDNS
 	class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count); end
 
 	class Client
-		#def initialize(pdns=['bfk','certee','dnsparse','dnsdb','virustotal','tcpiputils'])
-		def initialize(pdns=['bfk','certee','dnsparse','dnsdb','virustotal'])
+		def initialize(pdns=['bfk','certee','dnsdb','virustotal','tcpiputils'])
 			@pdnsdbs = []
 			pdns.uniq.each do |pd|
 				case pd
@@ -25,16 +23,16 @@ module PassiveDNS
 					@pdnsdbs << PassiveDNS::BFK.new
 				when 'certee'
 					@pdnsdbs << PassiveDNS::CERTEE.new
-				when 'dnsparse'
-					@pdnsdbs << PassiveDNS::DNSParse.new
+        #when 'dnsparse'
+				#	@pdnsdbs << PassiveDNS::DNSParse.new
 				when 'dnsdb'
 					@pdnsdbs << PassiveDNS::DNSDB.new
 				when 'isc'
 					@pdnsdbs << PassiveDNS::DNSDB.new
 				when 'virustotal'
 					@pdnsdbs << PassiveDNS::VirusTotal.new
-        #when 'tcpiputils'
-				#	@pdnsdbs << PassiveDNS::TCPIPUtils.new
+        when 'tcpiputils'
+					@pdnsdbs << PassiveDNS::TCPIPUtils.new
 				else
 					raise "Unknown Passive DNS provider: #{pd}"
 				end
