@@ -25,14 +25,6 @@ Or install it yourself as:
 
 ## Configuration
 
-### DNSParse
-
-The pdnstool looks for a configuration file for DNSParse to be located at $HOME/.dnsparse by default. It requires three items of information, one per line: the base URL, a username, and a password. E.g.,
-
-  https://dnsparse.wherever/query.php?submit=Search&format=json&querytext=
-  myusername
-  mypassword
-
 ### DNSDB (Farsight Security)
 
 The DNSDB configuration file is located at $HOME/.dnsdb-query.conf by default. The format for its configuration file only requires one line in the following format:
@@ -55,22 +47,29 @@ VirusTotal's  (https://www.virustotal.com) passive DNS database requires an apik
   01234567890abcdef01234567890abcdef01234567890abcdef01234567890abcdef
 
 
+### TCPIPUtils
+
+TCPIPUtils's (http://www.tcpiputils.com/premium-access) passive DNS database requires and apikey in $HOME/.tcpiputils.  It is a 64 character hexstring on a single line.
+
+  01234567890abcdef01234567890abcdef01234567890abcdef01234567890abcdef
+
 ## Usage
 
 	require 'passivedns-client'
 	
-	c = PassiveDNS::Client.new(['bfk','dnsdb']) # providers: bfk, dnsparse, certee, dnsdb, virustotal
+	c = PassiveDNS::Client.new(['bfk','dnsdb']) # providers: bfk, tcpiputils, certee, dnsdb, virustotal
 	results = c.query("example.com")
 	
 Or use the included tool!
 
-	Usage: bin/pdnstool [-a|-b|-e|-d|-i|-V] [-c|-x|-y|-j|-t] [-s <sep>] [-f <file>] [-r#|-w#|-l] <ip|domain|cidr>
-	  -a uses all of the available passive dns databases
-	  -b only use BFK
-	  -e only use CERT-EE
-	  -d only use DNSParse (default)
-	  -i only use DNSDB (formerly ISC)
-	  -V only use VirusTotal
+	Usage: bin/pdnstool [-d [bedvt]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>
+	  -dbedvt uses all of the available passive dns databases
+	  -db only use BFK
+	  -de only use CERT-EE (default)
+	  -dd only use DNSDB (formerly ISC)
+	  -dv only use VirusTotal
+	  -dt only use TCPIPUtils
+	  -dvt uses VirusTotal and TCPIPUtils (for example)
 
 	  -g outputs a link-nodal GDF visualization definition
 	  -v outputs a link-nodal graphviz visualization definition
@@ -85,7 +84,8 @@ Or use the included tool!
 	  -f[file] specifies a sqlite3 database used to read the current state - useful for large result sets and generating graphs of previous runs.
 	  -r# specifies the levels of recursion to pull. **WARNING** This is quite taxing on the pDNS servers, so use judiciously (never more than 3 or so) or find yourself blocked!
 	  -w# specifies the amount of time to wait, in seconds, between queries (Default: 0)
-	  -l outputs debugging information
+	  -v outputs debugging information
+	  -l <count> limits the number of records returned per passive dns database queried.
 
 ## Contributing
 
