@@ -40,6 +40,10 @@ To obtain an API Key, go to http://www.tcpiputils.com/premium-access and purchas
           data.each do |rec|
             recs << PDNSResult.new("tcpiputils", delta, question, rec["dns"], "MX", nil, nil, rec["updatedate"], nil)
           end
+        when "domains"
+          data.each do |rec|
+            recs << PDNSResult.new("tcpiputils", delta, rec, question, "A", nil, nil, nil, nil)
+          end
         end
       end
       recs
@@ -47,7 +51,8 @@ To obtain an API Key, go to http://www.tcpiputils.com/premium-access and purchas
 
     def lookup(label, limit=nil)
       $stderr.puts "DEBUG: TCPIPUtils.lookup(#{label})" if @debug
-      url = "https://www.utlsapi.com/api.php?version=1.0&apikey=#{@apikey}&type=domainipdnshistory&q=#{label}"
+      type = (label.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) ? "domainneighbors" : "domainipdnshistory"
+      url = "https://www.utlsapi.com/api.php?version=1.0&apikey=#{@apikey}&type=#{type}&q=#{label}"
       recs = []
       Timeout::timeout(240) {
 				url = URI.parse url
