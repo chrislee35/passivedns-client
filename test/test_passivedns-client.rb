@@ -47,6 +47,12 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
     assert_equal(3, rows.length)
+    rows = PassiveDNS::BFK.new.lookup("8.8.8.8")
+    assert_not_nil(rows)
+    assert_not_nil(rows.to_s)
+    assert_not_nil(rows.to_xml)
+    assert_not_nil(rows.to_json)
+    assert_not_nil(rows.to_yaml)
 	end
 	
 	def test_CERTEE
@@ -62,6 +68,12 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
     assert_equal(3, rows.length)
+    rows = PassiveDNS::CERTEE.new.lookup("8.8.8.8")
+    assert_not_nil(rows)
+    assert_not_nil(rows.to_s)
+    assert_not_nil(rows.to_xml)
+    assert_not_nil(rows.to_json)
+    assert_not_nil(rows.to_yaml)
 	end
 
 	def test_DNSDB
@@ -76,6 +88,12 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
     assert_equal(3, rows.length) # this will fail since DNSDB has an off by one error
+    rows = PassiveDNS::DNSDB.new.lookup("8.8.8.8")
+    assert_not_nil(rows)
+    assert_not_nil(rows.to_s)
+    assert_not_nil(rows.to_xml)
+    assert_not_nil(rows.to_json)
+    assert_not_nil(rows.to_yaml)
 	end
 
 	def test_VirusTotal
@@ -90,6 +108,12 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
     assert_equal(3, rows.length)
+    rows = PassiveDNS::VirusTotal.new.lookup("8.8.8.8")
+    assert_not_nil(rows)
+    assert_not_nil(rows.to_s)
+    assert_not_nil(rows.to_xml)
+    assert_not_nil(rows.to_json)
+    assert_not_nil(rows.to_yaml)
 	end
   
   def test_TCPIPUtils
@@ -110,5 +134,11 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
     assert_not_nil(rows.to_json)
     assert_not_nil(rows.to_yaml)
     assert_equal(3, rows.length)
+    rows = PassiveDNS::TCPIPUtils.new.lookup("8.8.8.8")
+    assert_not_nil(rows)
+    assert_not_nil(rows.to_s)
+    assert_not_nil(rows.to_xml)
+    assert_not_nil(rows.to_json)
+    assert_not_nil(rows.to_yaml)
   end
 end
