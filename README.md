@@ -53,6 +53,19 @@ TCPIPUtils's (http://www.tcpiputils.com/premium-access) passive DNS database req
 
   01234567890abcdef01234567890abcdef01234567890abcdef01234567890abcdef
 
+
+### PassiveDNS.cn from 360.cn
+
+PassiveDNS.cn (http://www.passivedns.cn) requires an API ID and and API KEY, which is obtainable by creating an account and sending an email to request an API key.  
+
+The configuration file can be in /etc/flint.conf (flint is the name of their tool, which is available at <a href='https://github.com/360netlab/flint'>https://github.com/360netlab/flint</a>) or in $HOME/.flint.conf (which is my preference).
+
+The file must have three lines and looks like:
+
+  API = http://some.web.address.for.their.api
+  API_ID = a username that is given when you register
+  API_KEY = a long and random password of sorts that is used along with the page request to generate a per page API key
+
 ## Usage
 
 	require 'passivedns-client'

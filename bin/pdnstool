@@ -50,12 +50,13 @@ end
 
 def usage
 	puts "Usage: #{$0} [-d [bedvt]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>"
-	puts "  -dbedvt uses all of the available passive dns databases"
-	puts "  -db only use BFK"
-	puts "  -de only use CERT-EE (default)"
-	puts "  -dd only use DNSDB (formerly ISC)"
-	puts "  -dv only use VirusTotal"
-  puts "  -dt only use TCPIPUtils"
+	puts "  -dbedvt3 uses all of the available passive dns databases"
+	puts "  -db use BFK"
+	puts "  -de use CERT-EE (default)"
+	puts "  -dd use DNSDB (formerly ISC)"
+	puts "  -dv use VirusTotal"
+  puts "  -dt use TCPIPUtils"
+  puts "  -d3 use 360.cn (www.passivedns.cn)"
   puts "  -dvt uses VirusTotal and TCPIPUtils (for example)"
 	puts ""
 	puts "  -g outputs a link-nodal GDF visualization definition"
@@ -128,6 +129,8 @@ opts.each do |opt, arg|
     		pdnsdbs << "virustotal"
       when 't'
         pdnsdbs << "tcpiputils"
+      when '3'
+        pdnsdbs << "cn360"
       else
         raise "Unknown passive DNS database identifier: #{c}"
       end
