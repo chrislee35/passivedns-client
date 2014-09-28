@@ -62,9 +62,9 @@ The configuration file can be in /etc/flint.conf (flint is the name of their too
 
 The file must have three lines and looks like:
 
-  API = http://some.web.address.for.their.api
-  API_ID = a username that is given when you register
-  API_KEY = a long and random password of sorts that is used along with the page request to generate a per page API key
+	API = http://some.web.address.for.their.api
+	API_ID = a username that is given when you register
+	API_KEY = a long and random password of sorts that is used along with the page request to generate a per page API key
 
 ## Usage
 
