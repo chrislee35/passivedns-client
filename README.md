@@ -100,6 +100,12 @@ Or use the included tool!
 	  -v outputs debugging information
 	  -l <count> limits the number of records returned per passive dns database queried.
 
+## Passive DNS - Common Output Format
+
+There is an RFC, <a href='http://tools.ietf.org/html/draft-dulaunoy-kaplan-passive-dns-cof-01'>Passive DNS - Common Output Format</a>, and a proof of concept implementation, <a href='https://github.com/adulau/pdns-qof-server'>pdns-qof-server</a>, that describes a recommened JSON format for passive DNS data.  passivedns-client is very close to supporting it, but since I've never enteracted with a true implementation of this RFC, I can't attest that I could correctly parse it.  I think they way that they can encode multiple results into one record would actually break what I have right now.
+
+Right now, I'm in a wait and see mode with how this progresses before I start supporting yet another format or request that other providers start to adhere to a common output format.  If you have thoughts on the matter, I would love to discuss.
+
 ## Contributing
 
 1. Fork it
@@ -107,3 +113,5 @@ Or use the included tool!
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+<a href='mailto:github@chrislee[dot]dhs[dot]org[stop here]xxx'><img src='http://chrisleephd.us/images/github-email.png?passivedns-client'></a>
