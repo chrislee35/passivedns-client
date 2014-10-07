@@ -68,7 +68,7 @@ The file must have three lines and looks like:
 
 ## Usage
 
-	require 'passivedns-client'
+	require 'passivedns/client'
 	
 	c = PassiveDNS::Client.new(['bfk','dnsdb']) # providers: bfk, tcpiputils, certee, dnsdb, virustotal
 	results = c.query("example.com")
