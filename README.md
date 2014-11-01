@@ -36,7 +36,8 @@ To request an API Key, please read https://api.dnsdb.info/.
 ### CERTEE
 
 CERT-EE does not require any configuration.
-BFK.de
+
+### BFK.de
 
 BFK.de does not require any configuration. However, please read and abide by their usage policy at BFK.de. Currently, it just says not to perform automated queries.
 
