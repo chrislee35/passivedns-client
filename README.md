@@ -80,7 +80,7 @@ Mnemonic requests that API access and automated query be approved by them first.
 
 	require 'passivedns/client'
 	
-	c = PassiveDNS::Client.new(['bfk','dnsdb']) # providers: bfk, tcpiputils, certee, dnsdb, virustotal
+	c = PassiveDNS::Client.new(['bfk','dnsdb']) # providers: bfk, tcpiputils, certee, dnsdb, virustotal, passivedns.cn, mnemonic
 	results = c.query("example.com")
 	
 Or use the included tool!
