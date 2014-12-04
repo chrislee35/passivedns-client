@@ -4,7 +4,6 @@ require 'structformatter'
 require 'getoptlong'
 require 'yaml'
 
-$LOAD_PATH.unshift File.expand_path('/Users/ahunt/Documents/passivedns-client-contrib/passivedns-client/lib', __FILE__)
 
 def pdnslookup(state,pdnsclient,recursedepth=1,wait=0,debug=false,limit=nil)
 	puts "pdnslookup: #{state.level} #{recursedepth}" if debug
