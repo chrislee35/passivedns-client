@@ -10,13 +10,14 @@ require 'passivedns/client/virustotal.rb'
 require 'passivedns/client/tcpiputils.rb'
 require 'passivedns/client/cn360.rb'
 require 'passivedns/client/state.rb'
+require 'passivedns/client/mnemonic.rb'
 
 module PassiveDNS
 
 	class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count); end
 
 	class Client
-		def initialize(pdns=['bfk','certee','dnsdb','virustotal','tcpiputils','cn360'])
+		def initialize(pdns=['bfk','certee','dnsdb','virustotal','tcpiputils','cn360','mnemonic'])
 			@pdnsdbs = []
 			pdns.uniq.each do |pd|
 				case pd
@@ -30,10 +31,12 @@ module PassiveDNS
 					@pdnsdbs << PassiveDNS::DNSDB.new
 				when 'virustotal'
 					@pdnsdbs << PassiveDNS::VirusTotal.new
-        when 'tcpiputils'
+				when 'tcpiputils'
 					@pdnsdbs << PassiveDNS::TCPIPUtils.new
-        when 'cn360'
+				when 'cn360'
 					@pdnsdbs << PassiveDNS::CN360.new
+				when 'mnemonic'
+					@pdnsdbs << PassiveDNS::Mnemonic.new
 				else
 					raise "Unknown Passive DNS provider: #{pd}"
 				end

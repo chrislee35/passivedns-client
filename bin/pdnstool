@@ -4,6 +4,8 @@ require 'structformatter'
 require 'getoptlong'
 require 'yaml'
 
+$LOAD_PATH.unshift File.expand_path('/Users/ahunt/Documents/passivedns-client-contrib/passivedns-client/lib', __FILE__)
+
 def pdnslookup(state,pdnsclient,recursedepth=1,wait=0,debug=false,limit=nil)
 	puts "pdnslookup: #{state.level} #{recursedepth}" if debug
 	level = 0
@@ -49,15 +51,16 @@ def printresults(state,format,sep="\t")
 end
 
 def usage
-	puts "Usage: #{$0} [-d [bedvt]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>"
-	puts "  -dbedvt3 uses all of the available passive dns databases"
+	puts "Usage: #{$0} [-d [bedvt3m]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>"
+	puts "  -dbedvt3m uses all of the available passive dns databases"
 	puts "  -db use BFK"
 	puts "  -de use CERT-EE (default)"
 	puts "  -dd use DNSDB (formerly ISC)"
 	puts "  -dv use VirusTotal"
-  puts "  -dt use TCPIPUtils"
-  puts "  -d3 use 360.cn (www.passivedns.cn)"
-  puts "  -dvt uses VirusTotal and TCPIPUtils (for example)"
+	puts "  -dt use TCPIPUtils"
+	puts "  -d3 use 360.cn (www.passivedns.cn)"
+	puts "  -dm uses Mnemonic (passivedns.mnemonic.no)"
+	puts "  -dvt uses VirusTotal and TCPIPUtils (for example)"
 	puts ""
 	puts "  -g outputs a link-nodal GDF visualization definition"
 	puts "  -v outputs a link-nodal graphviz visualization definition"
@@ -73,14 +76,14 @@ def usage
 	puts "  -r# specifies the levels of recursion to pull. **WARNING** This is quite taxing on the pDNS servers, so use judiciously (never more than 3 or so) or find yourself blocked!"
 	puts "  -w# specifies the amount of time to wait, in seconds, between queries (Default: 0)"
 	puts "  -v outputs debugging information"
-  puts "  -l <count> limits the number of records returned per passive dns database queried."
+	puts "  -l <count> limits the number of records returned per passive dns database queried."
 	exit
 end
 
 opts = GetoptLong.new(
 	[ '--help', '-h', GetoptLong::NO_ARGUMENT ],
 	[ '--debug', '-z', GetoptLong::NO_ARGUMENT ],
-  [ '--database', '-d', GetoptLong::REQUIRED_ARGUMENT ],
+	[ '--database', '-d', GetoptLong::REQUIRED_ARGUMENT ],
 	
 	[ '--gdf', '-g', GetoptLong::NO_ARGUMENT ],
 	[ '--graphviz', '-v', GetoptLong::NO_ARGUMENT ],
@@ -95,7 +98,7 @@ opts = GetoptLong.new(
 	[ '--sqlite3', '-f', GetoptLong::REQUIRED_ARGUMENT ],
 	[ '--recurse', '-r', GetoptLong::REQUIRED_ARGUMENT ],
 	[ '--wait', '-w', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--limit', '-l', GetoptLong::REQUIRED_ARGUMENT ]
+	[ '--limit', '-l', GetoptLong::REQUIRED_ARGUMENT ]
 )
 
 # sets the default search methods
@@ -115,25 +118,27 @@ opts.each do |opt, arg|
 		usage
 	when '--debug'
 		debug = true
-  when '--database'
-    arg.split(//).each do |c|
-      case c
-      when ','
-      when 'b'
-    		pdnsdbs << "bfk"
-      when 'e'
-    		pdnsdbs << "certee"
-      when 'd'
-    		pdnsdbs << "dnsdb"
-      when 'v'
-    		pdnsdbs << "virustotal"
-      when 't'
-        pdnsdbs << "tcpiputils"
-      when '3'
-        pdnsdbs << "cn360"
-      else
-        raise "Unknown passive DNS database identifier: #{c}"
-      end
+	when '--database'
+	arg.split(//).each do |c|
+		case c
+			when ','
+			when 'b'
+				pdnsdbs << "bfk"
+			when 'e'
+				pdnsdbs << "certee"
+			when 'd'
+				pdnsdbs << "dnsdb"
+			when 'v'
+				pdnsdbs << "virustotal"
+			when 't'
+				pdnsdbs << "tcpiputils"
+			when '3'
+				pdnsdbs << "cn360"
+			when 'm'
+				pdnsdbs << "mnemonic"
+			else
+				raise "Unknown passive DNS database identifier: #{c}"
+			end
     end
 	when '--gdf'
 		format = 'gdf'
@@ -164,8 +169,8 @@ opts.each do |opt, arg|
 		wait = arg.to_i
 	when '--sqlite3'
 		sqlitedb = arg
-  when '--limit'
-    limit = arg.to_i
+	when '--limit'
+		limit = arg.to_i
 	else
 		usage
 	end
@@ -182,15 +187,15 @@ end
 
 if debug
 	$stderr.puts "Using the following databases: #{pdnsdbs.join(", ")}"
-  $stderr.puts "Recursions: #{recursedepth}, Wait time: #{wait}, Limit: #{limit or 'none'}"
-  if format == "text" or format == "csv"
-    $stderr.puts "Output format: #{format} (sep=\"#{sep}\")"
-  else
-    $stderr.puts "Output format: #{format}"
-  end
-  if ENV['http_proxy']
-    $stderr.puts "Using proxy settings: http_proxy=#{ENV['http_proxy']}, https_proxy=#{ENV['https_proxy']}"
-  end
+	$stderr.puts "Recursions: #{recursedepth}, Wait time: #{wait}, Limit: #{limit or 'none'}"
+	if format == "text" or format == "csv"
+    	$stderr.puts "Output format: #{format} (sep=\"#{sep}\")"
+	else
+    	$stderr.puts "Output format: #{format}"
+	end
+	if ENV['http_proxy']
+		$stderr.puts "Using proxy settings: http_proxy=#{ENV['http_proxy']}, https_proxy=#{ENV['https_proxy']}"
+	end
 end
 
 state = nil

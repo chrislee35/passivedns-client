@@ -1,6 +1,6 @@
 # PassiveDNS::Client
 
-This rubygem queries 5 major Passive DNS databases: BFK, CERTEE, DNSParse, DNSDB, and VirusTotal.
+This rubygem queries 7 major Passive DNS databases: BFK, CERTEE, DNSParse, DNSDB, VirusTotal, PassiveDNS.cn, and Mnemonic.
 Passive DNS is a technique where IP to hostname mappings are made by recording the answers of other people's queries.  
 
 There is a tool included, pdnstool, that wraps a lot of the functionality that you would need.
@@ -67,6 +67,15 @@ The file must have three lines and looks like:
 	API_ID = a username that is given when you register
 	API_KEY = a long and random password of sorts that is used along with the page request to generate a per page API key
 
+### Mnemonic
+
+Mnemonic requires an API KEY in $HOME/.mnemonic, which may be requested by making an inquiry to mss @ mnemonic.no. It is a 40 character hexstring on a single line. 
+
+  01234567890abcdef01234567890abcdef012345
+
+Mnemonic requests that API access and automated query be approved by them first. Please abide this request.
+
+
 ## Usage
 
 	require 'passivedns/client'
@@ -76,13 +85,15 @@ The file must have three lines and looks like:
 	
 Or use the included tool!
 
-	Usage: bin/pdnstool [-d [bedvt]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>
-	  -dbedvt uses all of the available passive dns databases
-	  -db only use BFK
-	  -de only use CERT-EE (default)
-	  -dd only use DNSDB (formerly ISC)
-	  -dv only use VirusTotal
-	  -dt only use TCPIPUtils
+	Usage: bin/pdnstool [-d [bedvt3m]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>
+	  -dbedvt3m uses all of the available passive dns databases
+	  -db use BFK
+	  -de use CERT-EE (default)
+	  -dd use DNSDB (formerly ISC)
+	  -dv use VirusTotal
+	  -dt use TCPIPUtils
+	  -d3 use 360.cn (www.passivedns.cn)
+	  -dm uses Mnemonic (passivedns.mnemonic.no)
 	  -dvt uses VirusTotal and TCPIPUtils (for example)
 
 	  -g outputs a link-nodal GDF visualization definition
