@@ -166,5 +166,31 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
     assert_not_nil(rows.to_xml)
     assert_not_nil(rows.to_json)
     assert_not_nil(rows.to_yaml)
-  end
+	end
+  
+    def test_cn360
+		assert_not_nil(PassiveDNS::Mnemonic.new)
+		assert_nothing_raised do
+			PassiveDNS::Client.new(['mnemonic'])
+		end
+		rows = PassiveDNS::Mnemonic.new.lookup("example.org")
+		assert_not_nil(rows)
+		assert_not_nil(rows.to_s)
+		assert_not_nil(rows.to_xml)
+		assert_not_nil(rows.to_json)
+		assert_not_nil(rows.to_yaml)
+		rows = PassiveDNS::Mnemonic.new.lookup("example.org",3)
+		assert_not_nil(rows)
+		assert_not_nil(rows.to_s)
+		assert_not_nil(rows.to_xml)
+		assert_not_nil(rows.to_json)
+		assert_not_nil(rows.to_yaml)
+		assert_equal(3, rows.length)
+		rows = PassiveDNS::Mnemonic.new.lookup("8.8.8.8")
+		assert_not_nil(rows)
+		assert_not_nil(rows.to_s)
+		assert_not_nil(rows.to_xml)
+		assert_not_nil(rows.to_json)
+		assert_not_nil(rows.to_yaml)
+	end
 end
