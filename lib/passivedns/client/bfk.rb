@@ -1,12 +1,27 @@
 require 'open-uri'
+require_relative 'passivedb'
 
 module PassiveDNS
-	class BFK
-		attr_accessor :debug
-		def initialize
-			@debug = false
+	class BFK < PassiveDB
+    # override
+    def self.name
+      "BFK.de"
+    end
+    #override
+    def self.config_section_name
+      "bfk"
+    end
+    #override
+    def self.option_letter
+      "b"
+    end
+    
+    attr_accessor :debug
+		def initialize(options={})
+			@debug = options[:debug] || false
+      @base = options["URL"] || "http://www.bfk.de/bfk_dnslogger.html?query="
 		end
-		@@base = "http://www.bfk.de/bfk_dnslogger.html?query="
+    
 		def parse(page,response_time)
 			line = page.unpack('C*').pack('U*').split(/<table/).grep(/ id=\"logger\"/)
 			return [] unless line.length > 0
@@ -29,23 +44,23 @@ module PassiveDNS
 							######### FIX BLANKS FOR MX
 							
 					end
-					res << PDNSResult.new('BFK',response_time,r[0],r[2],r[1])
+					res << PDNSResult.new(self.class.name,response_time,r[0],r[2],r[1])
 				end
 			end
 			res
 		rescue Exception => e
-			$stderr.puts "BFKClient Exception: #{e}"
+			$stderr.puts "#{self.class.name} Exception: #{e}"
 			raise e
 		end
 
+    # override
 		def lookup(label, limit=nil)	
-			$stderr.puts "DEBUG: BFKClient.lookup(#{label})" if @debug
+			$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
 			Timeout::timeout(240) {
 				t1 = Time.now
 				open(
-					@@base+label,
-					"User-Agent" => "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}",
-					:http_basic_authentication => [@user,@pass]
+					@base+label,
+					"User-Agent" => "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}"
 				) do |f|
 					t2 = Time.now
 					recs = parse(f.read,t2-t1)
@@ -57,7 +72,7 @@ module PassiveDNS
 				end
 			}
 		rescue Timeout::Error => e
-			$stderr.puts "BFK lookup timed out: #{label}"      
+			$stderr.puts "#{self.class.name} lookup timed out: #{label}"      
 		end
 	end
 end

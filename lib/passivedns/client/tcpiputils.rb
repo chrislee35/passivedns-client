@@ -6,18 +6,25 @@ require 'json'
 # Please read http://www.tcpiputils.com/terms-of-service under automated requests
 
 module PassiveDNS
-  class TCPIPUtils
+  class TCPIPUtils < PassiveDB
+    # override
+    def self.name
+      "TCPIPUtils"
+    end
+    #override
+    def self.config_section_name
+      "tcpiputils"
+    end
+    #override
+    def self.option_letter
+      "t"
+    end
+
     attr_accessor :debug
-    def initialize(config="#{ENV['HOME']}/.tcpiputils")
-      @debug = false
-			if File.exist?(config)
-				@apikey = File.open(config).read.split(/\n/)[0]
-				$stderr.puts "DEBUG: TCPIPUtils#initialize(#{@apikey})" if @debug
-			else
-				raise "Error: Configuration file for TCPIPUtils is required for intialization
-Format of configuration file (default: #{ENV['HOME']}/.tcpiputils) is the 64 hex character apikey on one line.
-To obtain an API Key, go to http://www.tcpiputils.com/premium-access and purchase premium API access."
-			end
+    def initialize(options={})
+      @debug = options[:debug] || false
+      @apikey = options["APIKEY"] || raise("#{self.class.name} requires an APIKEY.  See README.md")
+      @url = options["URL"] || "https://www.utlsapi.com/api.php?version=1.0&apikey="
     end
     
     def format_recs(reply_data, question, delta)
@@ -26,23 +33,23 @@ To obtain an API Key, go to http://www.tcpiputils.com/premium-access and purchas
         case key
         when "ipv4"
           data.each do |rec|
-            recs << PDNSResult.new("tcpiputils", delta, question, rec["ip"], "A", nil, nil, rec["updatedate"], nil)
+            recs << PDNSResult.new(self.class.name, delta, question, rec["ip"], "A", nil, nil, rec["updatedate"], nil)
           end
         when "ipv6"
           data.each do |rec|
-            recs << PDNSResult.new("tcpiputils", delta, question, rec["ip"], "AAAA", nil, nil, rec["updatedate"], nil)
+            recs << PDNSResult.new(self.class.name, delta, question, rec["ip"], "AAAA", nil, nil, rec["updatedate"], nil)
           end
         when "dns"
           data.each do |rec|
-            recs << PDNSResult.new("tcpiputils", delta, question, rec["dns"], "NS", nil, nil, rec["updatedate"], nil)
+            recs << PDNSResult.new(self.class.name, delta, question, rec["dns"], "NS", nil, nil, rec["updatedate"], nil)
           end
         when "mx"
           data.each do |rec|
-            recs << PDNSResult.new("tcpiputils", delta, question, rec["dns"], "MX", nil, nil, rec["updatedate"], nil)
+            recs << PDNSResult.new(self.class.name, delta, question, rec["dns"], "MX", nil, nil, rec["updatedate"], nil)
           end
         when "domains"
           data.each do |rec|
-            recs << PDNSResult.new("tcpiputils", delta, rec, question, "A", nil, nil, nil, nil)
+            recs << PDNSResult.new(self.class.name, delta, rec, question, "A", nil, nil, nil, nil)
           end
         end
       end
@@ -50,9 +57,9 @@ To obtain an API Key, go to http://www.tcpiputils.com/premium-access and purchas
     end
 
     def lookup(label, limit=nil)
-      $stderr.puts "DEBUG: TCPIPUtils.lookup(#{label})" if @debug
+      $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
       type = (label.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) ? "domainneighbors" : "domainipdnshistory"
-      url = "https://www.utlsapi.com/api.php?version=1.0&apikey=#{@apikey}&type=#{type}&q=#{label}"
+      url = "#{@url}#{@apikey}&type=#{type}&q=#{label}"
       recs = []
       Timeout::timeout(240) {
 				url = URI.parse url
@@ -70,7 +77,7 @@ To obtain an API Key, go to http://www.tcpiputils.com/premium-access and purchas
           question = reply["data"]["question"]
           recs = format_recs(reply["data"], question, delta)
         elsif reply["status"] and reply["status"] == "error"
-          raise "TCPIPUtils: error from web API: #{reply["data"]}"
+          raise "#{self.class.name}: error from web API: #{reply["data"]}"
         end
         if limit
           recs[0,limit]
@@ -79,7 +86,7 @@ To obtain an API Key, go to http://www.tcpiputils.com/premium-access and purchas
         end
 			}
 		rescue Timeout::Error => e
-			$stderr.puts "TCPIPUtils lookup timed out: #{label}"
+			$stderr.puts "#{self.class.name} lookup timed out: #{label}"
 		end
   end
 end

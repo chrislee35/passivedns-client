@@ -4,16 +4,26 @@ require 'net/https'
 require 'openssl'
 
 module PassiveDNS
-	class VirusTotal
-		attr_accessor :debug
-		def initialize(config="#{ENV['HOME']}/.virustotal")
-			if File.exist?(config)
-				@apikey = File.open(config).read.split(/\n/)[0]
-				$stderr.puts "DEBUG: VirusTotal#initialize(#{@apikey})" if @debug
-			else
-				raise "Configuration file for VirusTotal is required for intialization\nFormat of configuration file (default: #{ENV['HOME']}/.virustotal) is the 64 hex character apikey on one line."
-			end
-		end
+	class VirusTotal < PassiveDB
+    # override
+    def self.name
+      "VirusTotal"
+    end
+    #override
+    def self.config_section_name
+      "virustotal"
+    end
+     #override
+    def self.option_letter
+      "v"
+    end
+    
+    attr_accessor :debug
+		def initialize(options={})
+      @debug = options[:debug] || false
+      @apikey = options["APIKEY"] || raise("#{self.class.name} requires an APIKEY.  See README.md")
+      @url = options["URL"] || "https://www.virustotal.com/vtapi/v2/"
+    end
 
 		def parse_json(page,query,response_time=0)
 			res = []
@@ -22,9 +32,9 @@ module PassiveDNS
 			if data['resolutions']
 				data['resolutions'].each do |row|
 					if row['ip_address']
-						res << PDNSResult.new('VirusTotal',response_time,query,row['ip_address'],'A',nil,nil,row['last_resolved'])
+						res << PDNSResult.new(self.class.name,response_time,query,row['ip_address'],'A',nil,nil,row['last_resolved'])
 					elsif row['hostname']
-						res << PDNSResult.new('VirusTotal',response_time,row['hostname'],query,'A',nil,nil,row['last_resolved'])
+						res << PDNSResult.new(self.class.name,response_time,row['hostname'],query,'A',nil,nil,row['last_resolved'])
 					end
 				end
 			end
@@ -35,15 +45,15 @@ module PassiveDNS
 		end
 
 		def lookup(label, limit=nil)
-			$stderr.puts "DEBUG: VirusTotal.lookup(#{label})" if @debug
+			$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
 			Timeout::timeout(240) {
 				url = nil
 				if label =~ /^[\d\.]+$/
-					url = "https://www.virustotal.com/vtapi/v2/ip-address/report?ip=#{label}&apikey=#{@apikey}"
+					url = "#{@url}ip-address/report?ip=#{label}&apikey=#{@apikey}"
 				else
-					url = "https://www.virustotal.com/vtapi/v2/domain/report?domain=#{label}&apikey=#{@apikey}"
+					url = "#{@url}domain/report?domain=#{label}&apikey=#{@apikey}"
 				end
-				$stderr.puts "DEBUG: VirusTotal url = #{url}" if @debug
+				$stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
 				url = URI.parse url
 				http = Net::HTTP.new(url.host, url.port)
 				http.use_ssl = (url.scheme == 'https')
@@ -62,7 +72,7 @@ module PassiveDNS
         end
 			}
 		rescue Timeout::Error => e
-			$stderr.puts "VirusTotal lookup timed out: #{label}"
+			$stderr.puts "#{self.class.name} lookup timed out: #{label}"
 		end
 	end
 end

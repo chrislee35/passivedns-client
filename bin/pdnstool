@@ -49,15 +49,19 @@ def printresults(state,format,sep="\t")
 end
 
 def usage
-	puts "Usage: #{$0} [-d [bedvt3m]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>"
-	puts "  -dbedvt3m uses all of the available passive dns databases"
-	puts "  -db use BFK"
-	puts "  -de use CERT-EE (default)"
-	puts "  -dd use DNSDB (formerly ISC)"
-	puts "  -dv use VirusTotal"
-	puts "  -dt use TCPIPUtils"
-	puts "  -d3 use 360.cn (www.passivedns.cn)"
-	puts "  -dm uses Mnemonic (passivedns.mnemonic.no)"
+  letter_map = {}
+  PassiveDNS.constants.each do |const|
+    if PassiveDNS.const_get(const).is_a?(Class) and PassiveDNS.const_get(const).superclass == PassiveDNS::PassiveDB
+      letter_map[PassiveDNS.const_get(const).option_letter] = [PassiveDNS.const_get(const).name, PassiveDNS.const_get(const).config_section_name]
+    end
+  end
+  databases = letter_map.keys.sort.join("")
+
+	puts "Usage: #{$0} [-d [#{databases}]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>"
+	puts "  -d#{databases} uses all of the available passive dns databases"
+  letter_map.keys.sort.each do |l|
+    puts "  -d#{l} use #{letter_map[l][0]}"
+  end
 	puts "  -dvt uses VirusTotal and TCPIPUtils (for example)"
 	puts ""
 	puts "  -g outputs a link-nodal GDF visualization definition"
@@ -117,26 +121,14 @@ opts.each do |opt, arg|
 	when '--debug'
 		debug = true
 	when '--database'
-	arg.split(//).each do |c|
-		case c
-			when ','
-			when 'b'
-				pdnsdbs << "bfk"
-			when 'e'
-				pdnsdbs << "certee"
-			when 'd'
-				pdnsdbs << "dnsdb"
-			when 'v'
-				pdnsdbs << "virustotal"
-			when 't'
-				pdnsdbs << "tcpiputils"
-			when '3'
-				pdnsdbs << "cn360"
-			when 'm'
-				pdnsdbs << "mnemonic"
-			else
-				raise "Unknown passive DNS database identifier: #{c}"
-			end
+  	arg.split(//).each do |c|
+      if c == ','
+        next
+      elsif letter_map[c]
+        pdnsdbs = letter_map[c][1]
+      else
+        raise "Unknown passive DNS database identifier: #{c}"
+      end
     end
 	when '--gdf'
 		format = 'gdf'

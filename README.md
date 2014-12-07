@@ -25,6 +25,8 @@ Or install it yourself as:
 
 ## Configuration
 
+From version 2.0.0 on, all configuration keys for passive DNS providers are in one configuration file.  By default the location of the file is $HOME/.passivedns-client .  The synt
+
 ### DNSDB (Farsight Security)
 
 The DNSDB configuration file is located at $HOME/.dnsdb-query.conf by default. The format for its configuration file only requires one line in the following format:

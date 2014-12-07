@@ -5,15 +5,25 @@ require 'net/https'
 require 'openssl'
 
 module PassiveDNS
-	class Mnemonic
-		attr_accessor :debug
-		def initialize(config="#{ENV['HOME']}/.mnemonic")
-			if File.exist?(config)
-				@apikey = File.open(config).read.split(/\n/)[0]
-				$stderr.puts "DEBUG: Mnemonic#initialize(#{@apikey})" if @debug
-			else
-				raise "Configuration file for Mnemonic is required for intialization\nFormat of configuration file (default: #{ENV['HOME']}/.mnemonic) is the 40 character apikey on one line."
-			end
+	class Mnemonic < PassiveDB
+    # override
+    def self.name
+      "Mnemonic"
+    end
+    #override
+    def self.config_section_name
+      "mnemonic"
+    end
+    #override
+    def self.option_letter
+      "m"
+    end
+    
+    attr_accessor :debug
+		def initialize(options={})
+      @debug = options[:debug] || false
+      @apikey = options["APIKEY"] || raise("#{self.class.name} requires an APIKEY")
+      @url = options["URL"] || "https://passivedns.mnemonic.no/api1/?apikey="
 		end
 
 		def parse_json(page,query,response_time=0)
@@ -23,21 +33,21 @@ module PassiveDNS
 			if data['result']
 				data['result'].each do |row|
 					if row['query']
-						res << PDNSResult.new('Mnemonic',response_time,row['query'],row['answer'],row['type'].upcase,row['ttl'],row['first'],row['last'])
+						res << PDNSResult.new(self.class.name,response_time,row['query'],row['answer'],row['type'].upcase,row['ttl'],row['first'],row['last'])
 					end
 				end
 			end
 			res
 		rescue Exception => e
-			$stderr.puts "Mnemonic Exception: #{e}"
+			$stderr.puts "#{self.class.name} Exception: #{e}"
 			raise e
 		end
 
 		def lookup(label, limit=nil)
-			$stderr.puts "DEBUG: Mnemonic.lookup(#{label})" if @debug
+			$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
 			Timeout::timeout(240) {
-				url = "https://passivedns.mnemonic.no/api1/?apikey=#{@apikey}&query=#{label}&method=exact"
-				$stderr.puts "DEBUG: Mnemonic url = #{url}" if @debug
+				url = "#{@url}#{@apikey}&query=#{label}&method=exact"
+				$stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
 				url = URI.parse url
 				http = Net::HTTP.new(url.host, url.port)
 				http.use_ssl = (url.scheme == 'https')
@@ -56,7 +66,7 @@ module PassiveDNS
 				end
 			}
 		rescue Timeout::Error => e
-			$stderr.puts "Mnemonic lookup timed out: #{label}"
+			$stderr.puts "#{self.class.name} lookup timed out: #{label}"
 		end
 	end
 end

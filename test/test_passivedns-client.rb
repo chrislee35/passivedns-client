@@ -7,8 +7,21 @@ unless Kernel.respond_to?(:require_relative)
 end
 
 require_relative 'helper'
+require 'configparser'
 
 class TestPassiveDnsQuery < Test::Unit::TestCase
+  
+  def setup
+    configfile="#{ENV['HOME']}/.passivedns-client"
+    @cp = ConfigParser.new(configfile)
+    @class_map = {}
+    PassiveDNS.constants.each do |const|
+      if PassiveDNS.const_get(const).is_a?(Class) and PassiveDNS.const_get(const).superclass == PassiveDNS::PassiveDB
+        @class_map[PassiveDNS.const_get(const).config_section_name] = PassiveDNS.const_get(const)
+      end
+    end
+  end
+    
 	def test_instantiate_Nonexisting_Client
 		assert_raise RuntimeError do
 			PassiveDNS::Client.new(['doesnotexist'])
@@ -36,18 +49,19 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 	end
 	
 	def test_BFK
-		assert_not_nil(PassiveDNS::BFK.new)
 		assert_nothing_raised do
 			PassiveDNS::Client.new(['bfk'])
 		end
-		rows = PassiveDNS::BFK.new.lookup("example.org",3)
+    d = PassiveDNS::BFK.new(@cp['bfk'] || {})
+    assert_not_nil(d)
+		rows = d.lookup("example.org",3)
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
     assert_equal(3, rows.length)
-    rows = PassiveDNS::BFK.new.lookup("8.8.8.8")
+    rows = d.lookup("8.8.8.8")
     assert_not_nil(rows)
     assert_not_nil(rows.to_s)
     assert_not_nil(rows.to_xml)
@@ -57,18 +71,19 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 	
 	def test_CERTEE
     assert(false, "CERTEE is still offline")
-		assert_not_nil(PassiveDNS::CERTEE.new)
 		assert_nothing_raised do
 			PassiveDNS::Client.new(['certee'])
 		end
-		rows = PassiveDNS::CERTEE.new.lookup("sim.cert.ee",3)
+    d = PassiveDNS::CERTEE.new(@cp['certee'] || {})
+    assert_not_nil(d)
+		rows = d.lookup("sim.cert.ee",3)
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
     assert_equal(3, rows.length)
-    rows = PassiveDNS::CERTEE.new.lookup("8.8.8.8")
+    rows = d.lookup("8.8.8.8")
     assert_not_nil(rows)
     assert_not_nil(rows.to_s)
     assert_not_nil(rows.to_xml)
@@ -77,18 +92,19 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 	end
 
 	def test_DNSDB
-		assert_not_nil(PassiveDNS::DNSDB.new)
 		assert_nothing_raised do
 			PassiveDNS::Client.new(['dnsdb'])
 		end
-		rows = PassiveDNS::DNSDB.new.lookup("example.org",3)
+    d = PassiveDNS::DNSDB.new(@cp['dnsdb'] || {})
+    assert_not_nil(d)
+		rows = d.lookup("example.org",3)
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
     assert_equal(3, rows.length) # this will fail since DNSDB has an off by one error
-    rows = PassiveDNS::DNSDB.new.lookup("8.8.8.8")
+    rows = d.lookup("8.8.8.8")
     assert_not_nil(rows)
     assert_not_nil(rows.to_s)
     assert_not_nil(rows.to_xml)
@@ -97,18 +113,19 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 	end
 
 	def test_VirusTotal
-		assert_not_nil(PassiveDNS::VirusTotal.new)
 		assert_nothing_raised do
 			PassiveDNS::Client.new(['virustotal'])
 		end
-		rows = PassiveDNS::VirusTotal.new.lookup("google.com",3)
+    d = PassiveDNS::VirusTotal.new(@cp['virustotal'] || {})
+    assert_not_nil(d)
+		rows = d.lookup("google.com",3)
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
     assert_equal(3, rows.length)
-    rows = PassiveDNS::VirusTotal.new.lookup("8.8.8.8")
+    rows = d.lookup("8.8.8.8")
     assert_not_nil(rows)
     assert_not_nil(rows.to_s)
     assert_not_nil(rows.to_xml)
@@ -117,24 +134,25 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
 	end
   
   def test_TCPIPUtils
-    assert_not_nil(PassiveDNS::TCPIPUtils.new)
     assert_nothing_raised do
       PassiveDNS::Client.new(['tcpiputils'])
     end
-    rows = PassiveDNS::TCPIPUtils.new.lookup("example.org")
+    d = PassiveDNS::TCPIPUtils.new(@cp['tcpiputils'] || {})
+    assert_not_nil(d)
+    rows = d.lookup("example.org")
     assert_not_nil(rows)
     assert_not_nil(rows.to_s)
     assert_not_nil(rows.to_xml)
     assert_not_nil(rows.to_json)
     assert_not_nil(rows.to_yaml)
-    rows = PassiveDNS::TCPIPUtils.new.lookup("example.org",3)
+    rows = d.lookup("example.org",3)
     assert_not_nil(rows)
     assert_not_nil(rows.to_s)
     assert_not_nil(rows.to_xml)
     assert_not_nil(rows.to_json)
     assert_not_nil(rows.to_yaml)
     assert_equal(3, rows.length)
-    rows = PassiveDNS::TCPIPUtils.new.lookup("8.8.8.8")
+    rows = d.lookup("8.8.8.8")
     assert_not_nil(rows)
     assert_not_nil(rows.to_s)
     assert_not_nil(rows.to_xml)
@@ -143,24 +161,25 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
   end
 
   def test_cn360
-    assert_not_nil(PassiveDNS::CN360.new)
     assert_nothing_raised do
       PassiveDNS::Client.new(['cn360'])
     end
-    rows = PassiveDNS::CN360.new.lookup("example.org")
+    d = PassiveDNS::CN360.new(@cp['cn360'] || {})
+    assert_not_nil(d)
+    rows = d.lookup("example.org")
     assert_not_nil(rows)
     assert_not_nil(rows.to_s)
     assert_not_nil(rows.to_xml)
     assert_not_nil(rows.to_json)
     assert_not_nil(rows.to_yaml)
-    rows = PassiveDNS::CN360.new.lookup("example.org",3)
+    rows = d.lookup("example.org",3)
     assert_not_nil(rows)
     assert_not_nil(rows.to_s)
     assert_not_nil(rows.to_xml)
     assert_not_nil(rows.to_json)
     assert_not_nil(rows.to_yaml)
     assert_equal(3, rows.length)
-    rows = PassiveDNS::CN360.new.lookup("8.8.8.8")
+    rows = d.lookup("8.8.8.8")
     assert_not_nil(rows)
     assert_not_nil(rows.to_s)
     assert_not_nil(rows.to_xml)
@@ -168,25 +187,26 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
     assert_not_nil(rows.to_yaml)
 	end
   
-    def test_cn360
-		assert_not_nil(PassiveDNS::Mnemonic.new)
+  def test_nmemonic
 		assert_nothing_raised do
 			PassiveDNS::Client.new(['mnemonic'])
 		end
-		rows = PassiveDNS::Mnemonic.new.lookup("example.org")
+    d = PassiveDNS::Mnemonic.new(@cp['mnemonic'] || {})
+    assert_not_nil(d)
+		rows = d.lookup("example.org")
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
-		rows = PassiveDNS::Mnemonic.new.lookup("example.org",3)
+		rows = d.lookup("example.org",3)
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)
 		assert_not_nil(rows.to_json)
 		assert_not_nil(rows.to_yaml)
 		assert_equal(3, rows.length)
-		rows = PassiveDNS::Mnemonic.new.lookup("8.8.8.8")
+		rows = d.lookup("8.8.8.8")
 		assert_not_nil(rows)
 		assert_not_nil(rows.to_s)
 		assert_not_nil(rows.to_xml)

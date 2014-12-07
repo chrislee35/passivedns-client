@@ -3,34 +3,32 @@ require 'net/https'
 require 'openssl'
 require 'json'
 require 'digest/md5'
-require 'configparser'
-require 'pp'
-
-# Please read http://www.tcpiputils.com/terms-of-service under automated requests
+require_relative 'passivedb'
 
 module PassiveDNS
-  class CN360
+  class CN360 < PassiveDB
+    # override
+    def self.name
+      "360.cn"
+    end
+    #override
+    def self.config_section_name
+      "cn360"
+    end
+    #override
+    def self.option_letter
+      "3"
+    end
+    
     attr_accessor :debug
-        
-    def initialize(configfile="#{ENV["HOME"]}/.flint.conf")
-      @debug = false
-      if not File.exist?(configfile)
-        if not File.exist?("/etc/flint.conf")
-          raise "Cannot find a configuration file at #{configfile} or /etc/flint.conf"
+    def initialize(options={})
+      @debug = options[:debug] || false
+      ["API", "API_ID", "API_KEY"].each do |opt|
+        if not options[opt]
+          raise "Field #{opt} is required.  See README.md"
         end
-        configfile = "/etc/flint.conf"
       end
-      
-      @cp = ConfigParser.new(configfile)
-      if not @cp["API"]
-        raise "Field, API, is required in the configuration file.  It should specify the URL of the JSON Web API."
-      end
-      if not @cp["API_ID"]
-        raise "Field, API_ID, is required in the configuration file.  It should specify the user ID for the API key."
-      end
-      if not @cp["API_KEY"]
-        raise "Field, API_KEY, is required in the configuration file.  It should specify the API key."
-      end
+      @cp = options
     end
     
     def parse_json(page,query,response_time=0)
@@ -41,11 +39,11 @@ module PassiveDNS
         time_first = (row["time_first"]) ? Time.at(row["time_first"].to_i) : nil
         time_last = (row["time_last"]) ? Time.at(row["time_last"].to_i) : nil
         count = row["count"] || 0
-        res << PDNSResult.new('cn360', response_time, row["rrname"], row["rdata"], row["rrtype"], time_first, time_last, count)
+        res << PDNSResult.new(self.class.name, response_time, row["rrname"], row["rdata"], row["rrtype"], time_first, time_last, count)
 			end
 			res
 		rescue Exception => e
-			$stderr.puts "360.cn Exception: #{e}"
+			$stderr.puts "#{self.class.name} Exception: #{e}"
 			raise e
     end
     
@@ -60,7 +58,7 @@ module PassiveDNS
 			url = URI.parse url
 			http = Net::HTTP.new(url.host, url.port)
 			http.use_ssl = (url.scheme == 'https')
-			http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+			http.verify_mode = OpenSSL::SSL::VERIFY_NONE # I hate doing this
 			http.verify_depth = 5
 			request = Net::HTTP::Get.new(url.path)
 			request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")

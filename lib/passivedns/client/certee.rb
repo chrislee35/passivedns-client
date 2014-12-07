@@ -1,22 +1,40 @@
 require 'socket'
+require_relative 'passivedb'
 
 module PassiveDNS
-	class CERTEE
-		@@host = "sim.cert.ee"
-		attr_accessor :debug
-		def initialize
+	class CERTEE < PassiveDB
+    # override
+    def self.name
+      "CERTEE"
+    end
+    #override
+    def self.config_section_name
+      "certee"
+    end
+    #override
+    def self.option_letter
+      "e"
+    end
+    
+    attr_accessor :debug
+		def initialize(options={})
+      @debug = options[:debug] || false
+      @host = options["HOST"] || "sim.cert.ee"
+      @port = options["PORT"].to_i || 43
 		end
+
+    # override
 		def lookup(label, limit=nil)
-			$stderr.puts "DEBUG: CERTEE.lookup(#{label})" if @debug
+			$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
 			recs = []
 			begin
 				t1 = Time.now
-				s = TCPSocket.new(@@host,43)
+				s = TCPSocket.new(@host,@port)
 				s.puts(label)
 				s.each_line do |l|
           if l =~ /Traceback \(most recent call last\):/
             # there is a bug in the CERTEE lookup tool
-            raise "CERTEE is currently offline"
+            raise "#{self.class.name} is currently offline"
           end
 					(lbl,ans,fs,ls) = l.chomp.split(/\t/)
 					rrtype = 'A'
@@ -28,7 +46,7 @@ module PassiveDNS
 						rrtype = 'CNAME'
 					end
 					t2 = Time.now
-					recs << PDNSResult.new('CERTEE',t2-t1,lbl,ans,rrtype,0,Time.parse(fs).utc.strftime("%Y-%m-%dT%H:%M:%SZ"),Time.parse(ls).utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
+					recs << PDNSResult.new(self.class.name,t2-t1,lbl,ans,rrtype,0,Time.parse(fs).utc.strftime("%Y-%m-%dT%H:%M:%SZ"),Time.parse(ls).utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
 				end
 			rescue SocketError => e
 				$stderr.puts e

@@ -3,6 +3,7 @@ require "passivedns/client/version"
 # This code is released under the LGPL: http://www.gnu.org/licenses/lgpl-3.0.txt
 # Please note that use of any passive dns database is subject to the terms of use of that passive dns database.  Use of this script in violation of their terms is not encouraged in any way.  Also, please do not add any obfuscation to try to work around their terms of service.  If you need special services, ask the providers for help/permission.
 # Remember, these passive DNS operators are my friends.  I don't want to have a row with them because some asshat used this library to abuse them.
+require 'passivedns/client/passivedb.rb'
 require 'passivedns/client/bfk.rb'
 require 'passivedns/client/certee.rb'
 require 'passivedns/client/dnsdb.rb'
@@ -11,36 +12,33 @@ require 'passivedns/client/tcpiputils.rb'
 require 'passivedns/client/cn360.rb'
 require 'passivedns/client/state.rb'
 require 'passivedns/client/mnemonic.rb'
+require 'configparser'
+require 'pp'
 
 module PassiveDNS
 
 	class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count); end
 
 	class Client
-		def initialize(pdns=['bfk','certee','dnsdb','virustotal','tcpiputils','cn360','mnemonic'])
+		def initialize(pdns=['bfk','certee','dnsdb','virustotal','tcpiputils','cn360','mnemonic'], configfile="#{ENV['HOME']}/.passivedns-client")
+      cp = ConfigParser.new(configfile)
+      # this creates a map of all the PassiveDNS provider names and their classes
+      class_map = {}
+      PassiveDNS.constants.each do |const|
+        if PassiveDNS.const_get(const).is_a?(Class) and PassiveDNS.const_get(const).superclass == PassiveDNS::PassiveDB
+          class_map[PassiveDNS.const_get(const).config_section_name] = PassiveDNS.const_get(const)
+        end
+      end
+      
 			@pdnsdbs = []
-			pdns.uniq.each do |pd|
-				case pd
-				when 'bfk'
-					@pdnsdbs << PassiveDNS::BFK.new
-				when 'certee'
-					@pdnsdbs << PassiveDNS::CERTEE.new
-				when 'dnsdb'
-					@pdnsdbs << PassiveDNS::DNSDB.new
-				when 'isc'
-					@pdnsdbs << PassiveDNS::DNSDB.new
-				when 'virustotal'
-					@pdnsdbs << PassiveDNS::VirusTotal.new
-				when 'tcpiputils'
-					@pdnsdbs << PassiveDNS::TCPIPUtils.new
-				when 'cn360'
-					@pdnsdbs << PassiveDNS::CN360.new
-				when 'mnemonic'
-					@pdnsdbs << PassiveDNS::Mnemonic.new
-				else
-					raise "Unknown Passive DNS provider: #{pd}"
-				end
-			end
+      pdns.uniq.each do |pd|
+        if class_map[pd]
+          @pdnsdbs << class_map[pd].new(cp[pd] || {})
+        else
+          raise "Unknown Passive DNS provider: #{pd}"
+        end
+      end
+
 		end #initialize
 		
 		def debug=(d)

@@ -3,26 +3,28 @@
 # to request an API key, please email dnsdb-api at farsightsecurity dot com.
 require 'net/http'
 require 'net/https'
+require_relative 'passivedb'
 
 module PassiveDNS
-	class DNSDB
-		attr_accessor :debug
-		@@base="https://api.dnsdb.info/lookup"
-		
-		def initialize(config="#{ENV['HOME']}/.dnsdb-query.conf")
-			@debug = false
-			if File.exist?(config)
-				@key = File.open(config).readline.chomp
-				if @key =~ /^[0-9a-f]{64}$/
-					# pass
-				elsif @key =~ /^APIKEY=\"([0-9a-f]{64})\"/
-					@key = $1
-				else
-					raise "Format of configuration file (default: #{ENV['HOME']}/.dnsdb-query.conf) is:\nAPIKEY=\"<key>\"\nE.g.,\nAPIKEY=\"d41d8cd98f00b204e9800998ecf8427ed41d8cd98f00b204e9800998ecf8427e\"\n"
-				end
-			else
-				raise "Configuration file for DNSDB is required for intialization\nFormat of configuration file (default: #{ENV['HOME']}/.dnsdb-query.conf) is:\nAPIKEY=\"<key>\"\nE.g.,\nAPIKEY=\"d41d8cd98f00b204e9800998ecf8427ed41d8cd98f00b204e9800998ecf8427e\"\n"
-			end
+	class DNSDB < PassiveDB
+    # override
+    def self.name
+      "DNSDB"
+    end
+    #override
+    def self.config_section_name
+      "dnsdb"
+    end
+    #override
+    def self.option_letter
+      "d"
+    end
+    
+    attr_accessor :debug
+		def initialize(options={})
+			@debug = options[:debug] || false
+      @key = options["APIKEY"] || raise("APIKEY option required for #{self.class}")
+      @base = options["URL"] || "https://api.dnsdb.info/lookup"
 		end
 
 		def parse_json(page,response_time)
@@ -35,28 +37,28 @@ module PassiveDNS
 				record['rdata'] = [record['rdata']] if record['rdata'].class == String
 				record['rdata'].each do |rdata|
 					if record['time_first']
-						res << PDNSResult.new('DNSDB',response_time,record['rrname'],rdata,record['rrtype'],0,Time.at(record['time_first'].to_i).utc.strftime("%Y-%m-%dT%H:%M:%SZ"),Time.at(record['time_last'].to_i).utc.strftime("%Y-%m-%dT%H:%M:%SZ"),record['count'])
+						res << PDNSResult.new(self.class.name,response_time,record['rrname'],rdata,record['rrtype'],0,Time.at(record['time_first'].to_i).utc.strftime("%Y-%m-%dT%H:%M:%SZ"),Time.at(record['time_last'].to_i).utc.strftime("%Y-%m-%dT%H:%M:%SZ"),record['count'])
 					else
-						res << PDNSResult.new('DNSDB',response_time,record['rrname'],rdata,record['rrtype'])
+						res << PDNSResult.new(self.class.name,response_time,record['rrname'],rdata,record['rrtype'])
 					end
 				end
 			end
 			res
 		rescue Exception => e
-			$stderr.puts "DNSDB Exception: #{e}"
+			$stderr.puts "#{self.class.name} Exception: #{e}"
 			$stderr.puts page
 			raise e
 		end
 
 		def lookup(label, limit=nil)
-			$stderr.puts "DEBUG: DNSDB.lookup(#{label})" if @debug
+			$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
 			Timeout::timeout(240) {
 				url = nil
 				if label =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(\/\d{1,2})?$/
 					label = label.gsub(/\//,',')
-					url = "#{@@base}/rdata/ip/#{label}"
+					url = "#{@base}/rdata/ip/#{label}"
 				else
-					url = "#{@@base}/rrset/name/#{label}"
+					url = "#{@base}/rrset/name/#{label}"
 				end
 				url = URI.parse url
 				http = Net::HTTP.new(url.host, url.port)
@@ -78,7 +80,7 @@ module PassiveDNS
 				parse_json(response.body,t2-t1)
 			}
 		rescue Timeout::Error => e
-			$stderr.puts "DNSDB lookup timed out: #{label}"
+			$stderr.puts "#{self.class.name} lookup timed out: #{label}"
 		end
 	end
 end
