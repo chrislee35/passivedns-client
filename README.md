@@ -25,58 +25,29 @@ Or install it yourself as:
 
 ## Configuration
 
-From version 2.0.0 on, all configuration keys for passive DNS providers are in one configuration file.  By default the location of the file is $HOME/.passivedns-client .  The synt
+From version 2.0.0 on, all configuration keys for passive DNS providers are in one configuration file.  By default the location of the file is $HOME/.passivedns-client .  The syntax of this file is as follows:
 
-### DNSDB (Farsight Security)
-
-The DNSDB configuration file is located at $HOME/.dnsdb-query.conf by default. The format for its configuration file only requires one line in the following format:
-
-  APIKEY="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-
-To request an API Key, please read https://api.dnsdb.info/.
-
-### CERTEE
-
-CERT-EE does not require any configuration.
-
-### BFK.de
-
-BFK.de does not require any configuration. However, please read and abide by their usage policy at BFK.de. Currently, it just says not to perform automated queries.
-
-### VirusTotal
-
-VirusTotal's  (https://www.virustotal.com) passive DNS database requires an apikey in $HOME/.virustotal.  It is a 64 character hexstring on a single line.
-
-  01234567890abcdef01234567890abcdef01234567890abcdef01234567890abcdef
-
-
-### TCPIPUtils
-
-TCPIPUtils's (http://www.tcpiputils.com/premium-access) passive DNS database requires and apikey in $HOME/.tcpiputils.  It is a 64 character hexstring on a single line.
-
-  01234567890abcdef01234567890abcdef01234567890abcdef01234567890abcdef
-
-
-### PassiveDNS.cn from 360.cn
-
-PassiveDNS.cn (http://www.passivedns.cn) requires an API ID and and API KEY, which is obtainable by creating an account and sending an email to request an API key.  
-
-The configuration file can be in /etc/flint.conf (flint is the name of their tool, which is available at <a href='https://github.com/360netlab/flint'>https://github.com/360netlab/flint</a>) or in $HOME/.flint.conf (which is my preference).
-
-The file must have three lines and looks like:
-
+	[dnsdb]
+	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+	[cn360]
 	API = http://some.web.address.for.their.api
 	API_ID = a username that is given when you register
 	API_KEY = a long and random password of sorts that is used along with the page request to generate a per page API key
+	[tcpiputils]
+	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+	[virustotal]
+	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+	[mnemonic]
+	APIKEY = 01234567890abcdef01234567890abcdef012345
 
-### Mnemonic
-
-Mnemonic requires an API KEY in $HOME/.mnemonic, which may be requested by making an inquiry to mss @ mnemonic.no. It is a 40 character hexstring on a single line. 
-
-  01234567890abcdef01234567890abcdef012345
-
-Mnemonic requests that API access and automated query be approved by them first. Please abide this request.
-
+## Getting Access
+* 360.cn : http://www.passivedns.cn
+* BFK.de : No registration required, but please, please ready their usage policy at http://bfk.de
+* CERT-EE : No registration required
+* DNSDB (Farsight Security) : https://api.dnsdb.info/
+* Mnemonic : mss .at. mnemonic.no
+* TCPIPUtils : http://www.tcpiputils.com/premium-access
+* VirusTotal : https://www.virustotal.com
 
 ## Usage
 
@@ -113,6 +84,52 @@ Or use the included tool!
 	  -w# specifies the amount of time to wait, in seconds, between queries (Default: 0)
 	  -v outputs debugging information
 	  -l <count> limits the number of records returned per passive dns database queried.
+
+## Writing Your Own Database Adaptor
+
+	module PassiveDNS
+		class MyDatabaseAdaptor < PassiveDB
+			# override
+		    def self.name
+		      "MyPerfectDNS" # short, proper label
+		    end
+		    #override
+		    def self.config_section_name
+		      "perfect" # very short label to use in the configuration file
+		    end
+		    #override
+		    def self.option_letter
+		      "p" # single letter to specify the option for the command line tool
+		    end
+    
+		    attr_accessor :debug
+			def initialize(options={})
+			  @debug = options[:debug] || false
+			  # please include a way to change the base URL, HOST, etc., so that people can test
+			  # against a test/alternate version of your service
+		      @base = options["URL"] || "http://myperfectdns.example.com/pdns.cgi?query="
+			  @apikey = options["APIKEY"] || raise("APIKEY option required for #{self.class}")
+			end
+			
+			# override
+			def lookup(label, limit=nil)
+				$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
+				recs = []
+				Timeout::timeout(240) {
+					t1 = Time.now
+					# TODO: your code goes here to fetch the data from your service
+					# TODO: don't forget to impose the limit either during the fetch or during the parse phase
+					response_time = Time.now - t1
+					# TODO: parse your data and add PDNSResult objects to recs array
+					recs << PDNSResult.new(self.class.name, response_time, rrname ,
+						rdata, rrtype, ttl, first_seen, last_seen, count )
+				}
+				recs
+			rescue Timeout::Error => e # using the implied "begin/try" from the beginning of the function
+				$stderr.puts "#{self.class.name} lookup timed out: #{label}"
+			end
+		end
+	end
 
 ## Passive DNS - Common Output Format
 
