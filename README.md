@@ -42,7 +42,7 @@ From version 2.0.0 on, all configuration keys for passive DNS providers are in o
 
 ## Getting Access
 * 360.cn : http://www.passivedns.cn
-* BFK.de : No registration required, but please, please ready their usage policy at http://bfk.de
+* BFK.de : No registration required, but please, please ready their usage policy at http://www.bfk.de/bfk_dnslogger.html
 * CERT-EE : No registration required
 * DNSDB (Farsight Security) : https://api.dnsdb.info/
 * Mnemonic : mss .at. mnemonic.no
