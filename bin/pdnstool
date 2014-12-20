@@ -48,13 +48,7 @@ def printresults(state,format,sep="\t")
 	end
 end
 
-def usage
-  letter_map = {}
-  PassiveDNS.constants.each do |const|
-    if PassiveDNS.const_get(const).is_a?(Class) and PassiveDNS.const_get(const).superclass == PassiveDNS::PassiveDB
-      letter_map[PassiveDNS.const_get(const).option_letter] = [PassiveDNS.const_get(const).name, PassiveDNS.const_get(const).config_section_name]
-    end
-  end
+def usage(letter_map)
   databases = letter_map.keys.sort.join("")
 
 	puts "Usage: #{$0} [-d [#{databases}]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>"
@@ -103,6 +97,13 @@ opts = GetoptLong.new(
 	[ '--limit', '-l', GetoptLong::REQUIRED_ARGUMENT ]
 )
 
+letter_map = {}
+PassiveDNS.constants.each do |const|
+  if PassiveDNS.const_get(const).is_a?(Class) and PassiveDNS.const_get(const).superclass == PassiveDNS::PassiveDB
+    letter_map[PassiveDNS.const_get(const).option_letter] = [PassiveDNS.const_get(const).name, PassiveDNS.const_get(const).config_section_name]
+  end
+end
+
 # sets the default search methods
 pdnsdbs = []
 format = "text"
@@ -117,7 +118,7 @@ limit = nil
 opts.each do |opt, arg|
 	case opt
 	when '--help'
-		usage
+		usage(letter_map)
 	when '--debug'
 		debug = true
 	when '--database'
@@ -125,9 +126,10 @@ opts.each do |opt, arg|
       if c == ','
         next
       elsif letter_map[c]
-        pdnsdbs = letter_map[c][1]
+        pdnsdbs << letter_map[c][1]
       else
-        raise "Unknown passive DNS database identifier: #{c}"
+        $stderr.puts "ERROR: Unknown passive DNS database identifier: #{c}."
+        usage(letter_map)
       end
     end
 	when '--gdf'
@@ -162,7 +164,7 @@ opts.each do |opt, arg|
 	when '--limit'
 		limit = arg.to_i
 	else
-		usage
+		usage(letter_map)
 	end
 end
 
