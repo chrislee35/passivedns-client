@@ -3,15 +3,19 @@ require "passivedns/client/version"
 # This code is released under the LGPL: http://www.gnu.org/licenses/lgpl-3.0.txt
 # Please note that use of any passive dns database is subject to the terms of use of that passive dns database.  Use of this script in violation of their terms is not encouraged in any way.  Also, please do not add any obfuscation to try to work around their terms of service.  If you need special services, ask the providers for help/permission.
 # Remember, these passive DNS operators are my friends.  I don't want to have a row with them because some asshat used this library to abuse them.
-require 'passivedns/client/passivedb.rb'
-require 'passivedns/client/bfk.rb'
-require 'passivedns/client/certee.rb'
-require 'passivedns/client/dnsdb.rb'
-require 'passivedns/client/virustotal.rb'
-require 'passivedns/client/tcpiputils.rb'
-require 'passivedns/client/cn360.rb'
-require 'passivedns/client/state.rb'
-require 'passivedns/client/mnemonic.rb'
+require 'passivedns/client/state'
+require 'passivedns/client/passivedb'
+
+require 'passivedns/client/bfk'
+require 'passivedns/client/certee'
+require 'passivedns/client/circl'
+require 'passivedns/client/cn360'
+require 'passivedns/client/dnsdb'
+require 'passivedns/client/mnemonic'
+require 'passivedns/client/passivetotal'
+require 'passivedns/client/tcpiputils'
+require 'passivedns/client/virustotal'
+
 require 'configparser'
 require 'pp'
 
@@ -20,7 +24,7 @@ module PassiveDNS
 	class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count); end
 
 	class Client
-		def initialize(pdns=['bfk','certee','dnsdb','virustotal','tcpiputils','cn360','mnemonic'], configfile="#{ENV['HOME']}/.passivedns-client")
+		def initialize(pdns=['bfk','certee','dnsdb','virustotal','tcpiputils','cn360','mnemonic','passivetotal','CIRCL'], configfile="#{ENV['HOME']}/.passivedns-client")
       cp = ConfigParser.new(configfile)
       # this creates a map of all the PassiveDNS provider names and their classes
       class_map = {}

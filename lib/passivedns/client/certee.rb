@@ -20,7 +20,10 @@ module PassiveDNS
 		def initialize(options={})
       @debug = options[:debug] || false
       @host = options["HOST"] || "sim.cert.ee"
-      @port = options["PORT"].to_i || 43
+      @port = options["PORT"].to_i
+      if @port == 0
+        @port = 43
+      end
 		end
 
     # override

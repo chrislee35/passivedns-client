@@ -9,7 +9,7 @@ end
 require_relative 'helper'
 require 'configparser'
 
-class TestPassiveDnsQuery < Test::Unit::TestCase
+class TestPassiveDnsQuery < Minitest::Test
   
   def setup
     configfile="#{ENV['HOME']}/.passivedns-client"
@@ -23,194 +23,227 @@ class TestPassiveDnsQuery < Test::Unit::TestCase
   end
     
 	def test_instantiate_Nonexisting_Client
-		assert_raise RuntimeError do
+		assert_raises RuntimeError do
 			PassiveDNS::Client.new(['doesnotexist'])
 		end
 	end
 
 	def test_instantiate_All_Clients
-		assert_nothing_raised do
-			PassiveDNS::Client.new()
-		end
+		PassiveDNS::Client.new()
 	end
 	
 	def test_instantiate_Passive_DNS_State
-		assert_not_nil(PassiveDNS::PDNSToolState.new)
+		refute_nil(PassiveDNS::PDNSToolState.new)
 	end
 	
 	def test_instantiate_Passive_DNS_State_database
 		if File.exists?("test/test.sqlite3")
 			File.unlink("test/test.sqlite3")
 		end
-		assert_not_nil(PassiveDNS::PDNSToolStateDB.new("test/test.sqlite3"))
+		refute_nil(PassiveDNS::PDNSToolStateDB.new("test/test.sqlite3"))
 		if File.exists?("test/test.sqlite3")
 			File.unlink("test/test.sqlite3")
 		end
 	end
 	
 	def test_BFK
-		assert_nothing_raised do
-			PassiveDNS::Client.new(['bfk'])
-		end
+    PassiveDNS::Client.new(['bfk'])
     d = PassiveDNS::BFK.new(@cp['bfk'] || {})
-    assert_not_nil(d)
+    refute_nil(d)
 		rows = d.lookup("example.org",3)
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
     assert_equal(3, rows.length)
     rows = d.lookup("8.8.8.8")
-    assert_not_nil(rows)
-    assert_not_nil(rows.to_s)
-    assert_not_nil(rows.to_xml)
-    assert_not_nil(rows.to_json)
-    assert_not_nil(rows.to_yaml)
+    refute_nil(rows)
+    refute_nil(rows.to_s)
+    refute_nil(rows.to_xml)
+    refute_nil(rows.to_json)
+    refute_nil(rows.to_yaml)
 	end
 	
 	def test_CERTEE
-    assert(false, "CERTEE is still offline")
-		assert_nothing_raised do
-			PassiveDNS::Client.new(['certee'])
-		end
+		PassiveDNS::Client.new(['certee'])
     d = PassiveDNS::CERTEE.new(@cp['certee'] || {})
-    assert_not_nil(d)
+    refute_nil(d)
 		rows = d.lookup("sim.cert.ee",3)
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
     assert_equal(3, rows.length)
     rows = d.lookup("8.8.8.8")
-    assert_not_nil(rows)
-    assert_not_nil(rows.to_s)
-    assert_not_nil(rows.to_xml)
-    assert_not_nil(rows.to_json)
-    assert_not_nil(rows.to_yaml)
+    refute_nil(rows)
+    refute_nil(rows.to_s)
+    refute_nil(rows.to_xml)
+    refute_nil(rows.to_json)
+    refute_nil(rows.to_yaml)
 	end
 
 	def test_DNSDB
-		assert_nothing_raised do
-			PassiveDNS::Client.new(['dnsdb'])
-		end
+		PassiveDNS::Client.new(['dnsdb'])
     d = PassiveDNS::DNSDB.new(@cp['dnsdb'] || {})
-    assert_not_nil(d)
+    refute_nil(d)
 		rows = d.lookup("example.org",3)
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
     assert_equal(3, rows.length) # this will fail since DNSDB has an off by one error
     rows = d.lookup("8.8.8.8")
-    assert_not_nil(rows)
-    assert_not_nil(rows.to_s)
-    assert_not_nil(rows.to_xml)
-    assert_not_nil(rows.to_json)
-    assert_not_nil(rows.to_yaml)
+    refute_nil(rows)
+    refute_nil(rows.to_s)
+    refute_nil(rows.to_xml)
+    refute_nil(rows.to_json)
+    refute_nil(rows.to_yaml)
 	end
 
 	def test_VirusTotal
-		assert_nothing_raised do
-			PassiveDNS::Client.new(['virustotal'])
-		end
+		PassiveDNS::Client.new(['virustotal'])
     d = PassiveDNS::VirusTotal.new(@cp['virustotal'] || {})
-    assert_not_nil(d)
+    refute_nil(d)
 		rows = d.lookup("google.com",3)
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
     assert_equal(3, rows.length)
     rows = d.lookup("8.8.8.8")
-    assert_not_nil(rows)
-    assert_not_nil(rows.to_s)
-    assert_not_nil(rows.to_xml)
-    assert_not_nil(rows.to_json)
-    assert_not_nil(rows.to_yaml)
+    refute_nil(rows)
+    refute_nil(rows.to_s)
+    refute_nil(rows.to_xml)
+    refute_nil(rows.to_json)
+    refute_nil(rows.to_yaml)
 	end
   
   def test_TCPIPUtils
-    assert_nothing_raised do
-      PassiveDNS::Client.new(['tcpiputils'])
-    end
+    PassiveDNS::Client.new(['tcpiputils'])
     d = PassiveDNS::TCPIPUtils.new(@cp['tcpiputils'] || {})
-    assert_not_nil(d)
+    refute_nil(d)
     rows = d.lookup("example.org")
-    assert_not_nil(rows)
-    assert_not_nil(rows.to_s)
-    assert_not_nil(rows.to_xml)
-    assert_not_nil(rows.to_json)
-    assert_not_nil(rows.to_yaml)
+    refute_nil(rows)
+    refute_nil(rows.to_s)
+    refute_nil(rows.to_xml)
+    refute_nil(rows.to_json)
+    refute_nil(rows.to_yaml)
     rows = d.lookup("example.org",3)
-    assert_not_nil(rows)
-    assert_not_nil(rows.to_s)
-    assert_not_nil(rows.to_xml)
-    assert_not_nil(rows.to_json)
-    assert_not_nil(rows.to_yaml)
+    refute_nil(rows)
+    refute_nil(rows.to_s)
+    refute_nil(rows.to_xml)
+    refute_nil(rows.to_json)
+    refute_nil(rows.to_yaml)
     assert_equal(3, rows.length)
     rows = d.lookup("8.8.8.8")
-    assert_not_nil(rows)
-    assert_not_nil(rows.to_s)
-    assert_not_nil(rows.to_xml)
-    assert_not_nil(rows.to_json)
-    assert_not_nil(rows.to_yaml)
+    refute_nil(rows)
+    refute_nil(rows.to_s)
+    refute_nil(rows.to_xml)
+    refute_nil(rows.to_json)
+    refute_nil(rows.to_yaml)
   end
 
   def test_cn360
-    assert_nothing_raised do
-      PassiveDNS::Client.new(['cn360'])
-    end
+    PassiveDNS::Client.new(['cn360'])
     d = PassiveDNS::CN360.new(@cp['cn360'] || {})
-    assert_not_nil(d)
+    refute_nil(d)
     rows = d.lookup("example.org")
-    assert_not_nil(rows)
-    assert_not_nil(rows.to_s)
-    assert_not_nil(rows.to_xml)
-    assert_not_nil(rows.to_json)
-    assert_not_nil(rows.to_yaml)
+    refute_nil(rows)
+    refute_nil(rows.to_s)
+    refute_nil(rows.to_xml)
+    refute_nil(rows.to_json)
+    refute_nil(rows.to_yaml)
     rows = d.lookup("example.org",3)
-    assert_not_nil(rows)
-    assert_not_nil(rows.to_s)
-    assert_not_nil(rows.to_xml)
-    assert_not_nil(rows.to_json)
-    assert_not_nil(rows.to_yaml)
+    refute_nil(rows)
+    refute_nil(rows.to_s)
+    refute_nil(rows.to_xml)
+    refute_nil(rows.to_json)
+    refute_nil(rows.to_yaml)
     assert_equal(3, rows.length)
     rows = d.lookup("8.8.8.8")
-    assert_not_nil(rows)
-    assert_not_nil(rows.to_s)
-    assert_not_nil(rows.to_xml)
-    assert_not_nil(rows.to_json)
-    assert_not_nil(rows.to_yaml)
+    refute_nil(rows)
+    refute_nil(rows.to_s)
+    refute_nil(rows.to_xml)
+    refute_nil(rows.to_json)
+    refute_nil(rows.to_yaml)
 	end
   
   def test_nmemonic
-		assert_nothing_raised do
-			PassiveDNS::Client.new(['mnemonic'])
-		end
+		PassiveDNS::Client.new(['mnemonic'])
     d = PassiveDNS::Mnemonic.new(@cp['mnemonic'] || {})
-    assert_not_nil(d)
+    refute_nil(d)
 		rows = d.lookup("example.org")
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
 		rows = d.lookup("example.org",3)
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
 		assert_equal(3, rows.length)
 		rows = d.lookup("8.8.8.8")
-		assert_not_nil(rows)
-		assert_not_nil(rows.to_s)
-		assert_not_nil(rows.to_xml)
-		assert_not_nil(rows.to_json)
-		assert_not_nil(rows.to_yaml)
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
+	end
+  
+  def test_passivetotal
+		PassiveDNS::Client.new(['passivetotal'])
+    d = PassiveDNS::PassiveTotal.new(@cp['passivetotal'] || {})
+    refute_nil(d)
+		rows = d.lookup("example.org")
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
+		rows = d.lookup("example.org",3)
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
+		assert_equal(3, rows.length)
+		rows = d.lookup("8.8.8.8")
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
+	end
+    
+  def test_circl
+		PassiveDNS::Client.new(['CIRCL'])
+    d = PassiveDNS::CIRCL.new(@cp['CIRCL'] || {})
+    refute_nil(d)
+		rows = d.lookup("example.org")
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
+		rows = d.lookup("example.org",3)
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
+		assert_equal(3, rows.length)
+		rows = d.lookup("8.8.8.8")
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
 	end
 end
