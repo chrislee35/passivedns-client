@@ -1,6 +1,16 @@
 # PassiveDNS::Client
 
-This rubygem queries 7 major Passive DNS databases: BFK, CERTEE, DNSParse, DNSDB, VirusTotal, PassiveDNS.cn, and Mnemonic.
+This rubygem queries the following Passive DNS databases: 
+
+* BFK.de
+* CIRCL
+* DNSDB (FarSight)
+* Mnemonic
+* PassiveDNS.cn (Qihoo 360 Technology Co.,Ltd)
+* PassiveTotal
+* TCPIPUtils
+* VirusTotal
+
 Passive DNS is a technique where IP to hostname mappings are made by recording the answers of other people's queries.  
 
 There is a tool included, pdnstool, that wraps a lot of the functionality that you would need.
@@ -39,13 +49,24 @@ From version 2.0.0 on, all configuration keys for passive DNS providers are in o
 	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 	[mnemonic]
 	APIKEY = 01234567890abcdef01234567890abcdef012345
+	[passivetotal]
+	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+	[CIRCL]
+	USERNAME = circl_user
+	PASSWORD = circl_pass
+
+CIRCL also can use and authorization token.  In that case, you should drop the USERNAME and PASSWORD options and change the section to something like the following:
+
+	[CIRCL]
+	AUTH_TOKEN = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 ## Getting Access
 * 360.cn : http://www.passivedns.cn
 * BFK.de : No registration required, but please, please ready their usage policy at http://www.bfk.de/bfk_dnslogger.html
-* CERT-EE : No registration required
+* CIRCL : https://www.circl.lu/services/passive-dns/
 * DNSDB (Farsight Security) : https://api.dnsdb.info/
 * Mnemonic : mss .at. mnemonic.no
+* PassiveTotal : https://www.passivetotal.org
 * TCPIPUtils : http://www.tcpiputils.com/premium-access
 * VirusTotal : https://www.virustotal.com
 
@@ -56,34 +77,40 @@ From version 2.0.0 on, all configuration keys for passive DNS providers are in o
 	c = PassiveDNS::Client.new(['bfk','dnsdb']) # providers: bfk, tcpiputils, certee, dnsdb, virustotal, passivedns.cn, mnemonic
 	results = c.query("example.com")
 	
-Or use the included tool!
 
-	Usage: bin/pdnstool [-d [bedvt3m]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>
-	  -dbedvt3m uses all of the available passive dns databases
-	  -db use BFK
-	  -de use CERT-EE (default)
-	  -dd use DNSDB (formerly ISC)
-	  -dv use VirusTotal
+Or use the included tool...
+
+	Usage: bin/pdnstool [-d [3bcdmptv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>
+	Passive DNS Providers  -d3bcdmptv uses all of the available passive dns database
+	  -d3 use 360.cn
+	  -db use BFK.de
+	  -dc use CIRCL
+	  -dd use DNSDB
+	  -dm use Mnemonic
+	  -dp use PassiveTotal
 	  -dt use TCPIPUtils
-	  -d3 use 360.cn (www.passivedns.cn)
-	  -dm uses Mnemonic (passivedns.mnemonic.no)
+	  -dv use VirusTotal
 	  -dvt uses VirusTotal and TCPIPUtils (for example)
-
-	  -g outputs a link-nodal GDF visualization definition
-	  -v outputs a link-nodal graphviz visualization definition
-	  -m output a link-nodal graphml visualization definition
-	  -c outputs CSV
-	  -x outputs XML
-	  -y outputs YAML
-	  -j outputs JSON
-	  -t outputs ASCII text (default)
+	  
+	Output Formatting
+	  -g link-nodal GDF visualization definition
+	  -v link-nodal graphviz visualization definition
+	  -m link-nodal graphml visualization definition
+	  -c CSV
+	  -x XML
+	  -y YAML
+	  -j JSON
+	  -t ASCII text (default)
 	  -s <sep> specifies a field separator for text output, default is tab
-
+	  
+	State and Recusion
 	  -f[file] specifies a sqlite3 database used to read the current state - useful for large result sets and generating graphs of previous runs.
 	  -r# specifies the levels of recursion to pull. **WARNING** This is quite taxing on the pDNS servers, so use judiciously (never more than 3 or so) or find yourself blocked!
 	  -w# specifies the amount of time to wait, in seconds, between queries (Default: 0)
-	  -v outputs debugging information
 	  -l <count> limits the number of records returned per passive dns database queried.
+	  
+	Getting Help
+	  -v debugging information
 
 ## Writing Your Own Database Adaptor
 
