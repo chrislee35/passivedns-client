@@ -156,6 +156,7 @@ module PassiveDNS
     	help_text << "  -l <count> limits the number of records returned per passive dns database queried.\n"
     	help_text << "\n"
       help_text << "Getting Help\n"
+      help_text << "  -h hello there.  This option produces this helpful help information on how to access help.\n"
     	help_text << "  -v debugging information\n"
       
     	help_text
