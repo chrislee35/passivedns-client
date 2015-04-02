@@ -7,7 +7,6 @@ require 'passivedns/client/state'
 require 'passivedns/client/passivedb'
 
 require 'passivedns/client/bfk'
-require 'passivedns/client/certee'
 require 'passivedns/client/circl'
 require 'passivedns/client/cn360'
 require 'passivedns/client/dnsdb'
@@ -24,7 +23,7 @@ module PassiveDNS
 	class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count); end
 
 	class Client
-		def initialize(pdns=['bfk','certee','dnsdb','virustotal','tcpiputils','cn360','mnemonic','passivetotal','CIRCL'], configfile="#{ENV['HOME']}/.passivedns-client")
+		def initialize(pdns=['bfk','dnsdb','virustotal','tcpiputils','cn360','mnemonic','passivetotal','CIRCL'], configfile="#{ENV['HOME']}/.passivedns-client")
       cp = ConfigParser.new(configfile)
       # this creates a map of all the PassiveDNS provider names and their classes
       class_map = {}

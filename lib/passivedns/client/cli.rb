@@ -103,7 +103,7 @@ module PassiveDNS
       end
 
       if options[:pdnsdbs].length == 0
-      	options[:pdnsdbs] << "certee"
+      	options[:pdnsdbs] << "bfk"
       end
 
       if options[:pdnsdbs].index("bfk") and recursedepth > 1 and wait < 60
@@ -131,27 +131,33 @@ module PassiveDNS
       databases = letter_map.keys.sort.join("")
       help_text = "\n"
     	help_text << "Usage: #{$0} [-d [#{databases}]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>\n"
+      help_text << "Passive DNS Providers"
     	help_text << "  -d#{databases} uses all of the available passive dns database\n"
       letter_map.keys.sort.each do |l|
         help_text << "  -d#{l} use #{letter_map[l][0]}\n"
       end
     	help_text << "  -dvt uses VirusTotal and TCPIPUtils (for example)\n"
     	help_text << "\n"
-    	help_text << "  -g outhelp_text << a link-nodal GDF visualization definition\n"
-    	help_text << "  -v outhelp_text << a link-nodal graphviz visualization definition\n"
-    	help_text << "  -m output a link-nodal graphml visualization definition\n"
-    	help_text << "  -c outhelp_text << CSV\n"
-    	help_text << "  -x outhelp_text << XML\n"
-    	help_text << "  -y outhelp_text << YAML\n"
-    	help_text << "  -j outhelp_text << JSON\n"
-    	help_text << "  -t outhelp_text << ASCII text (default)\n"
+      help_text << "Output Formatting\n"
+    	help_text << "  -g link-nodal GDF visualization definition\n"
+    	help_text << "  -v link-nodal graphviz visualization definition\n"
+    	help_text << "  -m link-nodal graphml visualization definition\n"
+    	help_text << "  -c CSV\n"
+    	help_text << "  -x XML\n"
+    	help_text << "  -y YAML\n"
+    	help_text << "  -j JSON\n"
+    	help_text << "  -t ASCII text (default)\n"
     	help_text << "  -s <sep> specifies a field separator for text output, default is tab\n"
     	help_text << "\n"
+      help_text << "State and Recusion\n"
     	help_text << "  -f[file] specifies a sqlite3 database used to read the current state - useful for large result sets and generating graphs of previous runs.\n"
     	help_text << "  -r# specifies the levels of recursion to pull. **WARNING** This is quite taxing on the pDNS servers, so use judiciously (never more than 3 or so) or find yourself blocked!\n"
     	help_text << "  -w# specifies the amount of time to wait, in seconds, between queries (Default: 0)\n"
-    	help_text << "  -v outhelp_text << debugging information\n"
     	help_text << "  -l <count> limits the number of records returned per passive dns database queried.\n"
+    	help_text << "\n"
+      help_text << "Getting Help\n"
+    	help_text << "  -v debugging information\n"
+      
     	help_text
     end
     
