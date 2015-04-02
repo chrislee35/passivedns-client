@@ -65,25 +65,6 @@ class TestPassiveDnsQuery < Minitest::Test
     refute_nil(rows.to_yaml)
 	end
 	
-	def test_CERTEE
-		PassiveDNS::Client.new(['certee'])
-    d = PassiveDNS::CERTEE.new(@cp['certee'] || {})
-    refute_nil(d)
-		rows = d.lookup("sim.cert.ee",3)
-		refute_nil(rows)
-		refute_nil(rows.to_s)
-		refute_nil(rows.to_xml)
-		refute_nil(rows.to_json)
-		refute_nil(rows.to_yaml)
-    assert_equal(3, rows.length)
-    rows = d.lookup("8.8.8.8")
-    refute_nil(rows)
-    refute_nil(rows.to_s)
-    refute_nil(rows.to_xml)
-    refute_nil(rows.to_json)
-    refute_nil(rows.to_yaml)
-	end
-
 	def test_DNSDB
 		PassiveDNS::Client.new(['dnsdb'])
     d = PassiveDNS::DNSDB.new(@cp['dnsdb'] || {})

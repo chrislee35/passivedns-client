@@ -1,5 +1,4 @@
 require 'open-uri'
-require_relative 'passivedb'
 
 module PassiveDNS
 	class BFK < PassiveDB

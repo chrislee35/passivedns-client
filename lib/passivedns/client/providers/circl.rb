@@ -3,7 +3,6 @@
 require 'net/http'
 require 'net/https'
 require 'openssl'
-require 'pp'
 
 module PassiveDNS
 	class Circl < PassiveDB
@@ -22,7 +21,7 @@ module PassiveDNS
     
     attr_accessor :debug
 		def initialize(options={})
-      @debug = options[:debug] || true
+      @debug = options[:debug] || false
       @username = options["USERNAME"]
       @password = options["PASSWORD"]
       @auth_token = options["AUTH_TOKEN"]

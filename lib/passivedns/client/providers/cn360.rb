@@ -3,7 +3,6 @@ require 'net/https'
 require 'openssl'
 require 'json'
 require 'digest/md5'
-require_relative 'passivedb'
 
 module PassiveDNS
   class CN360 < PassiveDB

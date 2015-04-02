@@ -3,7 +3,6 @@
 # to request an API key, please email dnsdb-api at farsightsecurity dot com.
 require 'net/http'
 require 'net/https'
-require_relative 'passivedb'
 
 module PassiveDNS
 	class DNSDB < PassiveDB

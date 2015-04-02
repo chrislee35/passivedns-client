@@ -6,24 +6,23 @@ require "passivedns/client/version"
 require 'passivedns/client/state'
 require 'passivedns/client/passivedb'
 
-require 'passivedns/client/bfk'
-require 'passivedns/client/circl'
-require 'passivedns/client/cn360'
-require 'passivedns/client/dnsdb'
-require 'passivedns/client/mnemonic'
-require 'passivedns/client/passivetotal'
-require 'passivedns/client/tcpiputils'
-require 'passivedns/client/virustotal'
+# load all the providers
+$passivedns_providers = Array.new
+provider_path = File.dirname(__FILE__)+"/client/providers/*.rb"
+Dir.glob(provider_path).each do |provider|
+  name = File.basename(provider, '.rb')
+  require "passivedns/client/providers/#{name}.rb"
+  $passivedns_providers << name
+end
 
 require 'configparser'
-require 'pp'
 
 module PassiveDNS
 
 	class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count); end
 
 	class Client
-		def initialize(pdns=['bfk','dnsdb','virustotal','tcpiputils','cn360','mnemonic','passivetotal','CIRCL'], configfile="#{ENV['HOME']}/.passivedns-client")
+		def initialize(pdns=$passivedns_providers, configfile="#{ENV['HOME']}/.passivedns-client")
       cp = ConfigParser.new(configfile)
       # this creates a map of all the PassiveDNS provider names and their classes
       class_map = {}
