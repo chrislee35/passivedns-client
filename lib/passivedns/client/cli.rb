@@ -2,17 +2,30 @@ require 'getoptlong'
 require 'structformatter'
 require 'getoptlong'
 require 'yaml'
+require 'pp'
 
 module PassiveDNS
 	class CLInterface
+    def self.get_letter_map
+      letter_map = {}
+      PassiveDNS.constants.each do |const|
+        if PassiveDNS.const_get(const).is_a?(Class) and PassiveDNS.const_get(const).superclass == PassiveDNS::PassiveDB
+          letter_map[PassiveDNS.const_get(const).option_letter] = [PassiveDNS.const_get(const).name, PassiveDNS.const_get(const).config_section_name]
+        end
+      end
+      letter_map      
+    end
+    
     def self.parse_command_line(args)
+      origARGV = ARGV.dup
+      ARGV.replace(args)
       opts = GetoptLong.new(
       	[ '--help', '-h', GetoptLong::NO_ARGUMENT ],
-      	[ '--debug', '-z', GetoptLong::NO_ARGUMENT ],
+      	[ '--debug', '-v', GetoptLong::NO_ARGUMENT ],
       	[ '--database', '-d', GetoptLong::REQUIRED_ARGUMENT ],
 	
       	[ '--gdf', '-g', GetoptLong::NO_ARGUMENT ],
-      	[ '--graphviz', '-v', GetoptLong::NO_ARGUMENT ],
+      	[ '--graphviz', '-z', GetoptLong::NO_ARGUMENT ],
       	[ '--graphml', '-m', GetoptLong::NO_ARGUMENT ],
       	[ '--csv', '-c', GetoptLong::NO_ARGUMENT ],
       	[ '--xml', '-x', GetoptLong::NO_ARGUMENT ],
@@ -27,12 +40,7 @@ module PassiveDNS
       	[ '--limit', '-l', GetoptLong::REQUIRED_ARGUMENT ]
       )
 
-      letter_map = {}
-      PassiveDNS.constants.each do |const|
-        if PassiveDNS.const_get(const).is_a?(Class) and PassiveDNS.const_get(const).superclass == PassiveDNS::PassiveDB
-          letter_map[PassiveDNS.const_get(const).option_letter] = [PassiveDNS.const_get(const).name, PassiveDNS.const_get(const).config_section_name]
-        end
-      end
+      letter_map = get_letter_map
 
       # sets the default search methods
       options = {
@@ -44,14 +52,14 @@ module PassiveDNS
         :res => nil,
         :debug => false,
         :sqlitedb => nil,
-        :limit => nil
+        :limit => nil,
+        :help => false
       }
 
       opts.each do |opt, arg|
       	case opt
       	when '--help'
-      		puts usage(letter_map)
-          exit
+      		options[:help] = true
       	when '--debug'
       		options[:debug] = true
       	when '--database'
@@ -86,10 +94,6 @@ module PassiveDNS
       		options[:sep] = arg
       	when '--recurse'
       		options[:recursedepth] = arg.to_i
-      		if options[:recursedepth] > 3
-      			$stderr.puts "WARNING:  a recursedepth of > 3 can be abusive, please reconsider: sleeping 60 seconds for sense to come to you (hint: hit CTRL-C)"
-      			sleep 60
-      		end
       	when '--wait'
       		options[:wait] = arg.to_i
       	when '--sqlite3'
@@ -97,10 +101,11 @@ module PassiveDNS
       	when '--limit'
       		options[:limit] = arg.to_i
       	else
-      		puts usage(letter_map)
-          exit
+      		options[:help] = true
       	end
       end
+      args = ARGV.dup
+      ARGV.replace(origARGV)
 
       if options[:pdnsdbs].length == 0
       	options[:pdnsdbs] << "bfk"
@@ -129,9 +134,9 @@ module PassiveDNS
     
     def self.usage(letter_map)
       databases = letter_map.keys.sort.join("")
-      help_text = "\n"
+      help_text = ""
     	help_text << "Usage: #{$0} [-d [#{databases}]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>\n"
-      help_text << "Passive DNS Providers"
+      help_text << "Passive DNS Providers\n"
     	help_text << "  -d#{databases} uses all of the available passive dns database\n"
       letter_map.keys.sort.each do |l|
         help_text << "  -d#{l} use #{letter_map[l][0]}\n"
@@ -140,7 +145,7 @@ module PassiveDNS
     	help_text << "\n"
       help_text << "Output Formatting\n"
     	help_text << "  -g link-nodal GDF visualization definition\n"
-    	help_text << "  -v link-nodal graphviz visualization definition\n"
+    	help_text << "  -z link-nodal graphviz visualization definition\n"
     	help_text << "  -m link-nodal graphml visualization definition\n"
     	help_text << "  -c CSV\n"
     	help_text << "  -x XML\n"
@@ -149,7 +154,7 @@ module PassiveDNS
     	help_text << "  -t ASCII text (default)\n"
     	help_text << "  -s <sep> specifies a field separator for text output, default is tab\n"
     	help_text << "\n"
-      help_text << "State and Recusion\n"
+      help_text << "State and Recursion\n"
     	help_text << "  -f[file] specifies a sqlite3 database used to read the current state - useful for large result sets and generating graphs of previous runs.\n"
     	help_text << "  -r# specifies the levels of recursion to pull. **WARNING** This is quite taxing on the pDNS servers, so use judiciously (never more than 3 or so) or find yourself blocked!\n"
     	help_text << "  -w# specifies the amount of time to wait, in seconds, between queries (Default: 0)\n"
@@ -222,6 +227,13 @@ module PassiveDNS
     
     def self.run(args)
       options, items = parse_command_line(args)
+      if options[:help]
+        return usage(get_letter_map)
+      end
+  		if options[:recursedepth] > 3
+  			$stderr.puts "WARNING:  a recursedepth of > 3 can be abusive, please reconsider: sleeping 60 seconds for sense to come to you (hint: hit CTRL-C)"
+  			sleep 60
+  		end
       state = create_state(options[:sqlitedb])
       state.debug = options[:debug]
 

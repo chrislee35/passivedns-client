@@ -94,7 +94,7 @@ Or use the included tool...
 	  
 	Output Formatting
 	  -g link-nodal GDF visualization definition
-	  -v link-nodal graphviz visualization definition
+	  -z link-nodal graphviz visualization definition
 	  -m link-nodal graphml visualization definition
 	  -c CSV
 	  -x XML
