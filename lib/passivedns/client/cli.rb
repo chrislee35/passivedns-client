@@ -95,7 +95,7 @@ module PassiveDNS
       	when '--sqlite3'
       		options[:sqlitedb] = arg
       	when '--limit'
-      		otions[:limit] = arg.to_i
+      		options[:limit] = arg.to_i
       	else
       		puts usage(letter_map)
           exit
@@ -106,7 +106,7 @@ module PassiveDNS
       	options[:pdnsdbs] << "bfk"
       end
 
-      if options[:pdnsdbs].index("bfk") and recursedepth > 1 and wait < 60
+      if options[:pdnsdbs].index("bfk") and options[:recursedepth] > 1 and options[:wait] < 60
       	options[:wait] = 60
       	$stderr.puts "Enforcing a minimal 60 second wait when using BFK for recursive crawling"
       end
