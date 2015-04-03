@@ -204,8 +204,8 @@ class TestPassiveDnsQuery < Minitest::Test
 	end
     
   def test_circl
-		PassiveDNS::Client.new(['CIRCL'])
-    d = PassiveDNS::CIRCL.new(@cp['CIRCL'] || {})
+		PassiveDNS::Client.new(['circl'])
+    d = PassiveDNS::CIRCL.new(@cp['circl'] || {})
     refute_nil(d)
 		rows = d.lookup("example.org")
 		refute_nil(rows)

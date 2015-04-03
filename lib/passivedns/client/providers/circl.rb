@@ -12,7 +12,7 @@ module PassiveDNS
     end
     #override
     def self.config_section_name
-      "CIRCL"
+      "circl"
     end
     #override
     def self.option_letter

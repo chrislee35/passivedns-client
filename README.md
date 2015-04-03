@@ -51,13 +51,13 @@ From version 2.0.0 on, all configuration keys for passive DNS providers are in o
 	APIKEY = 01234567890abcdef01234567890abcdef012345
 	[passivetotal]
 	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-	[CIRCL]
+	[circl]
 	USERNAME = circl_user
 	PASSWORD = circl_pass
 
 CIRCL also can use and authorization token.  In that case, you should drop the USERNAME and PASSWORD options and change the section to something like the following:
 
-	[CIRCL]
+	[circl]
 	AUTH_TOKEN = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 ## Getting Access
@@ -172,4 +172,4 @@ Right now, I'm in a wait and see mode with how this progresses before I start su
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
-<a href='mailto:github@chrislee[dot]dhs[dot]org[stop here]xxx'><img src='http://chrisleephd.us/images/github-email.png?passivedns-client'></a>
+<a href='mailto:github@chrisleephd[dot]us[stop here]xxx'><img src='http://chrisleephd.us/images/github-email.png?passivedns-client'></a>
