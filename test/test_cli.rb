@@ -13,22 +13,23 @@ require_relative '../lib/passivedns/client/cli.rb'
 class TestCLI < Minitest::Test
   def test_letter_map
     letter_map = PassiveDNS::CLI.get_letter_map
-    assert_equal("3bcdmptv", letter_map.keys.sort.join(""))
+    assert_equal("3bcdmprtv", letter_map.keys.sort.join(""))
   end
   
   def test_help_text
     helptext = PassiveDNS::CLI.run(["--help"])
     helptext.gsub!(/Usage: .*?\[/, "Usage: [")
     assert_equal(
-"Usage: [-d [3bcdmptv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>
+"Usage: [-d [3bcdmprtv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>
 Passive DNS Providers
-  -d3bcdmptv uses all of the available passive dns database
+  -d3bcdmprtv uses all of the available passive dns database
   -d3 use 360.cn
   -db use BFK.de
   -dc use CIRCL
   -dd use DNSDB
   -dm use Mnemonic
   -dp use PassiveTotal
+  -dr use RiskIQ
   -dt use TCPIPUtils
   -dv use VirusTotal
   -dvt uses VirusTotal and TCPIPUtils (for example)
@@ -84,8 +85,8 @@ Getting Help
     assert_equal(options_target, options)
     assert_equal([], items)
    
-    options_target[:pdnsdbs] = ["circl", "dnsdb", "mnemonic"]
-    options, items = PassiveDNS::CLI.parse_command_line(["-dcdm"])
+    options_target[:pdnsdbs] = ["circl", "dnsdb", "mnemonic", "riskiq"]
+    options, items = PassiveDNS::CLI.parse_command_line(["-dcdmr"])
     assert_equal(options_target, options)
     assert_equal([], items)
     

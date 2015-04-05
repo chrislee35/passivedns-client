@@ -48,7 +48,7 @@ class TestPassiveDnsQuery < Minitest::Test
 	
 	def test_BFK
     PassiveDNS::Client.new(['bfk'])
-    d = PassiveDNS::BFK.new(@cp['bfk'] || {})
+    d = PassiveDNS::Provider::BFK.new(@cp['bfk'] || {})
     refute_nil(d)
 		rows = d.lookup("example.org",3)
 		refute_nil(rows)
@@ -67,7 +67,7 @@ class TestPassiveDnsQuery < Minitest::Test
 	
 	def test_DNSDB
 		PassiveDNS::Client.new(['dnsdb'])
-    d = PassiveDNS::DNSDB.new(@cp['dnsdb'] || {})
+    d = PassiveDNS::Provider::DNSDB.new(@cp['dnsdb'] || {})
     refute_nil(d)
 		rows = d.lookup("example.org",3)
 		refute_nil(rows)
@@ -86,7 +86,7 @@ class TestPassiveDnsQuery < Minitest::Test
 
 	def test_VirusTotal
 		PassiveDNS::Client.new(['virustotal'])
-    d = PassiveDNS::VirusTotal.new(@cp['virustotal'] || {})
+    d = PassiveDNS::Provider::VirusTotal.new(@cp['virustotal'] || {})
     refute_nil(d)
 		rows = d.lookup("google.com",3)
 		refute_nil(rows)
@@ -105,7 +105,7 @@ class TestPassiveDnsQuery < Minitest::Test
   
   def test_TCPIPUtils
     PassiveDNS::Client.new(['tcpiputils'])
-    d = PassiveDNS::TCPIPUtils.new(@cp['tcpiputils'] || {})
+    d = PassiveDNS::Provider::TCPIPUtils.new(@cp['tcpiputils'] || {})
     refute_nil(d)
     rows = d.lookup("example.org")
     refute_nil(rows)
@@ -130,7 +130,7 @@ class TestPassiveDnsQuery < Minitest::Test
 
   def test_cn360
     PassiveDNS::Client.new(['cn360'])
-    d = PassiveDNS::CN360.new(@cp['cn360'] || {})
+    d = PassiveDNS::Provider::CN360.new(@cp['cn360'] || {})
     refute_nil(d)
     rows = d.lookup("example.org")
     refute_nil(rows)
@@ -155,7 +155,7 @@ class TestPassiveDnsQuery < Minitest::Test
   
   def test_nmemonic
 		PassiveDNS::Client.new(['mnemonic'])
-    d = PassiveDNS::Mnemonic.new(@cp['mnemonic'] || {})
+    d = PassiveDNS::Provider::Mnemonic.new(@cp['mnemonic'] || {})
     refute_nil(d)
 		rows = d.lookup("example.org")
 		refute_nil(rows)
@@ -180,7 +180,7 @@ class TestPassiveDnsQuery < Minitest::Test
   
   def test_passivetotal
 		PassiveDNS::Client.new(['passivetotal'])
-    d = PassiveDNS::PassiveTotal.new(@cp['passivetotal'] || {})
+    d = PassiveDNS::Provider::PassiveTotal.new(@cp['passivetotal'] || {})
     refute_nil(d)
 		rows = d.lookup("example.org")
 		refute_nil(rows)
@@ -205,7 +205,32 @@ class TestPassiveDnsQuery < Minitest::Test
     
   def test_circl
 		PassiveDNS::Client.new(['circl'])
-    d = PassiveDNS::CIRCL.new(@cp['circl'] || {})
+    d = PassiveDNS::Provider::CIRCL.new(@cp['circl'] || {})
+    refute_nil(d)
+		rows = d.lookup("example.org")
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
+		rows = d.lookup("example.org",3)
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
+		assert_equal(3, rows.length)
+		rows = d.lookup("8.8.8.8")
+		refute_nil(rows)
+		refute_nil(rows.to_s)
+		refute_nil(rows.to_xml)
+		refute_nil(rows.to_json)
+		refute_nil(rows.to_yaml)
+	end
+  
+  def test_riskiq
+		PassiveDNS::Client.new(['riskiq'])
+    d = PassiveDNS::Provider::RiskIQ.new(@cp['riskiq'] || {})
     refute_nil(d)
 		rows = d.lookup("example.org")
 		refute_nil(rows)

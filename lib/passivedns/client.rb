@@ -8,27 +8,32 @@ require 'passivedns/client/passivedb'
 
 # load all the providers
 $passivedns_providers = Array.new
-provider_path = File.dirname(__FILE__)+"/client/providers/*.rb"
+provider_path = File.dirname(__FILE__)+"/client/provider/*.rb"
 Dir.glob(provider_path).each do |provider|
   name = File.basename(provider, '.rb')
-  require "passivedns/client/providers/#{name}.rb"
+  require "passivedns/client/provider/#{name}.rb"
   $passivedns_providers << name
 end
 
 require 'configparser'
 
-module PassiveDNS
-
+module PassiveDNS # :nodoc:
+  # struct to contain the results from a PassiveDNS lookup
 	class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count); end
 
+  # coodinates the lookups accross all configured PassiveDNS providers
 	class Client
+    
+    # instantiate and configure all specified PassiveDNS providers
+    # pdns        array of passivedns provider names, e.g., ["dnsdb","virustotal"]
+    # configfile  filename of the passivedns-client configuration (this should probably be abstracted)
 		def initialize(pdns=$passivedns_providers, configfile="#{ENV['HOME']}/.passivedns-client")
       cp = ConfigParser.new(configfile)
       # this creates a map of all the PassiveDNS provider names and their classes
       class_map = {}
-      PassiveDNS.constants.each do |const|
-        if PassiveDNS.const_get(const).is_a?(Class) and PassiveDNS.const_get(const).superclass == PassiveDNS::PassiveDB
-          class_map[PassiveDNS.const_get(const).config_section_name] = PassiveDNS.const_get(const)
+      PassiveDNS::Provider.constants.each do |const|
+        if PassiveDNS::Provider.const_get(const).is_a?(Class) and PassiveDNS::Provider.const_get(const).superclass == PassiveDNS::PassiveDB
+          class_map[PassiveDNS::Provider.const_get(const).config_section_name] = PassiveDNS::Provider.const_get(const)
         end
       end
       
@@ -43,12 +48,14 @@ module PassiveDNS
 
 		end #initialize
 		
+    # set the debug flag
 		def debug=(d)
 			@pdnsdbs.each do |pdnsdb|
 				pdnsdb.debug = d
 			end
 		end
 		
+    # perform the query lookup accross all configured PassiveDNS providers
 		def query(item, limit=nil)
 			threads = []
 			@pdnsdbs.each do |pdnsdb|

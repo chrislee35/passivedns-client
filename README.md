@@ -8,6 +8,7 @@ This rubygem queries the following Passive DNS databases:
 * Mnemonic
 * PassiveDNS.cn (Qihoo 360 Technology Co.,Ltd)
 * PassiveTotal
+* RiskIQ
 * TCPIPUtils
 * VirusTotal
 
@@ -54,6 +55,9 @@ From version 2.0.0 on, all configuration keys for passive DNS providers are in o
 	[circl]
 	USERNAME = circl_user
 	PASSWORD = circl_pass
+	[riskiq]
+	API_TOKEN = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+	API_PRIVATE_KEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 CIRCL also can use and authorization token.  In that case, you should drop the USERNAME and PASSWORD options and change the section to something like the following:
 
@@ -88,6 +92,7 @@ Or use the included tool...
 	  -dd use DNSDB
 	  -dm use Mnemonic
 	  -dp use PassiveTotal
+	  -dr use RiskIQ
 	  -dt use TCPIPUtils
 	  -dv use VirusTotal
 	  -dvt uses VirusTotal and TCPIPUtils (for example)

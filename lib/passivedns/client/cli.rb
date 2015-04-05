@@ -4,8 +4,11 @@ require 'getoptlong'
 require 'yaml'
 require 'pp'
 
-module PassiveDNS
+module PassiveDNS # :nodoc:
+  # Handles all the command-line parsing, state tracking, and dispatching queries to the PassiveDNS::Client instance
+  # CLInterface is aliased by CLI
 	class CLInterface
+    #  generates a mapping between the option letter for each PassiveDNS provider and the class
     def self.get_letter_map
       letter_map = {}
       PassiveDNS.constants.each do |const|
@@ -16,6 +19,20 @@ module PassiveDNS
       letter_map      
     end
     
+    # parses the command line and yields an options hash
+    # === Default Options
+    #      options = {
+    #        :pdnsdbs => [],     # passive dns providers to query
+    #        :format => "text",  # output format
+    #        :sep => "\t",       # field separator for text format
+    #        :recursedepth => 1, # recursion depth
+    #        :wait => 0,         # wait period between recursions
+    #        :res => nil,        # unused.  I don't remember why this is here.
+    #        :debug => false,    # debug flag
+    #        :sqlitedb => nil,   # filename for maintaining state in an sqlite3 db
+    #        :limit => nil,      # number of results per provider per recursion
+    #        :help => false      # display the usage text
+    #      }
     def self.parse_command_line(args)
       origARGV = ARGV.dup
       ARGV.replace(args)
@@ -132,6 +149,8 @@ module PassiveDNS
       [options, args]
     end
     
+    # returns a string containing the usage information
+    # takes in a hash of letter to passive dns providers
     def self.usage(letter_map)
       databases = letter_map.keys.sort.join("")
       help_text = ""
@@ -167,6 +186,7 @@ module PassiveDNS
     	help_text
     end
     
+    # performs a stateful, recursive (if desired) passive DNS lookup against all specified providers
     def self.pdnslookup(state, pdnsclient, options)
       recursedepth = options[:recursedepth]
       wait = options[:wait]
@@ -195,6 +215,7 @@ module PassiveDNS
     	state
     end
     
+    # returns a string transforming all the PassiveDNS::PDNSResult stored in the state object into text/xml/json/etc.
     def self.results_to_s(state,options)
       format = options[:format]
       sep = options[:sep]
@@ -216,6 +237,7 @@ module PassiveDNS
     	end
     end
     
+    # create a state instance
     def self.create_state(sqlitedb=nil)
       state = nil
       if sqlitedb
@@ -225,6 +247,7 @@ module PassiveDNS
       end
     end
     
+    # main method, takes command-line arguments and performs the desired queries and outputs
     def self.run(args)
       options, items = parse_command_line(args)
       if options[:help]
@@ -253,6 +276,7 @@ module PassiveDNS
       results_to_s(state,options)
     end
   end
+  # Alias for the CLInterface class
   CLI = PassiveDNS::CLInterface
 end
 
