@@ -3,7 +3,7 @@
 require 'net/http'
 require 'net/https'
 require 'openssl'
-require 'pp'
+#require 'pp'
 
 module PassiveDNS #:nodoc: don't document this
   # The Provider module contains all the Passive DNS provider client code
@@ -63,7 +63,7 @@ module PassiveDNS #:nodoc: don't document this
         
           if label =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/
             url = @url+"/dns/data"
-            params["data"] = label 
+            params["ip"] = label 
           else
             url = @url+"/dns/name"
             params["name"] = label

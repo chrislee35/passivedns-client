@@ -11,9 +11,13 @@ module PassiveDNS # :nodoc:
     #  generates a mapping between the option letter for each PassiveDNS provider and the class
     def self.get_letter_map
       letter_map = {}
-      PassiveDNS.constants.each do |const|
-        if PassiveDNS.const_get(const).is_a?(Class) and PassiveDNS.const_get(const).superclass == PassiveDNS::PassiveDB
-          letter_map[PassiveDNS.const_get(const).option_letter] = [PassiveDNS.const_get(const).name, PassiveDNS.const_get(const).config_section_name]
+      mod = PassiveDNS::Provider
+      mod.constants.each do |const|
+        if mod.const_get(const).is_a?(Class) and mod.const_get(const).superclass == PassiveDNS::PassiveDB
+          letter = mod.const_get(const).option_letter
+          name = mod.const_get(const).name
+          config_section_name = mod.const_get(const).config_section_name
+          letter_map[letter] = [name, config_section_name]
         end
       end
       letter_map      
@@ -263,8 +267,8 @@ module PassiveDNS # :nodoc:
       pdnsclient = PassiveDNS::Client.new(options[:pdnsdbs])
       pdnsclient.debug = options[:debug]
       
-      if ARGV.length > 0
-      	ARGV.each do |arg|
+      if items.length > 0
+      	items.each do |arg|
       		state.add_query(arg,'pending',0)
       	end
       else
