@@ -56,8 +56,8 @@ From version 2.0.0 on, all configuration keys for passive DNS providers are in o
 	USERNAME = circl_user
 	PASSWORD = circl_pass
 	[riskiq]
-	API_TOKEN = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-	API_PRIVATE_KEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+	API_TOKEN = 0123456789abcdef
+	API_PRIVATE_KEY = 01234567890abcdefghijklmnopqrstu
 
 CIRCL also can use and authorization token.  In that case, you should drop the USERNAME and PASSWORD options and change the section to something like the following:
 
@@ -71,6 +71,7 @@ CIRCL also can use and authorization token.  In that case, you should drop the U
 * DNSDB (Farsight Security) : https://api.dnsdb.info/
 * Mnemonic : mss .at. mnemonic.no
 * PassiveTotal : https://www.passivetotal.org
+* RiskIQ : https://github.com/RiskIQ/python_api/blob/master/LICENSE
 * TCPIPUtils : http://www.tcpiputils.com/premium-access
 * VirusTotal : https://www.virustotal.com
 
