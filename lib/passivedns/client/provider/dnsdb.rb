@@ -86,7 +86,6 @@ module PassiveDNS #:nodoc: don't document this
   		def parse_json(page,response_time)
   			res = []
   			raise "Error: unable to parse request" if page =~ /Error: unable to parse request/
-  			# need to remove the json_class tag or the parser will crap itself trying to find a class to align it to
   			rows = page.split(/\n/)
   			rows.each do |row|
   				record = JSON.parse(row)

@@ -78,7 +78,6 @@ module PassiveDNS #:nodoc: don't document this
       # parses the response of mnemonic's JSON reply to generate an array of PDNSResult
   		def parse_json(page,query,response_time=0)
   			res = []
-  			# need to remove the json_class tag or the parser will crap itself trying to find a class to align it to
   			data = JSON.parse(page)
   			if data['result']
   				data['result'].each do |row|
@@ -87,8 +86,8 @@ module PassiveDNS #:nodoc: don't document this
               answer = row['answer']
               rrtype = row['type'].upcase
               tty = row['ttl'].to_i
-              firstseen = row['first']
-              lastseen = row['last']
+              firstseen = Time.at(row['first'].to_i)
+              lastseen = Time.at(row['last'].to_i)
   						res << PDNSResult.new(self.class.name,response_time,
                 query, answer, rrtype, ttl, firstseen, lastseen)
   					end

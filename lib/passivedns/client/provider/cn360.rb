@@ -89,7 +89,6 @@ module PassiveDNS #:nodoc: don't document this
       # parses the response of 360.cn's JSON reply to generate an array of PDNSResult
       def parse_json(page,query,response_time=0)
   			res = []
-  			# need to remove the json_class tag or the parser will crap itself trying to find a class to align it to
   			data = JSON.parse(page)
         data.each do |row|
           time_first = (row["time_first"]) ? Time.at(row["time_first"].to_i) : nil

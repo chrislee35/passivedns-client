@@ -79,13 +79,10 @@ module PassiveDNS #:nodoc: don't document this
       # parses the response of passivetotals's JSON reply to generate an array of PDNSResult
   		def parse_json(page,query,response_time=0)
    			res = []
-  			# need to remove the json_class tag or the parser will crap itself trying to find a class to align it to
   			data = JSON.parse(page)
   			if data['results']
           query = data['results']['value']
   				data['results']['resolutions'].each do |row|
-            #p row['firstSeen']
-            #p row['lastSeen']
             first_seen = (row['firstSeen'] == "None") ? nil : Time.parse(row['firstSeen']+" +0000")
             last_seen = (row['lastSeen'] == "None") ? nil : Time.parse(row['lastSeen']+" +0000")
             value = row['value']

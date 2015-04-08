@@ -83,7 +83,6 @@ module PassiveDNS #:nodoc: don't document this
       # parses the response of virustotal's JSON reply to generate an array of PDNSResult
   		def parse_json(page,query,response_time=0)
   			res = []
-  			# need to remove the json_class tag or the parser will crap itself trying to find a class to align it to
   			data = JSON.parse(page)
   			if data['resolutions']
   				data['resolutions'].each do |row|
