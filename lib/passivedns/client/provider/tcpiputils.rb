@@ -86,27 +86,37 @@ module PassiveDNS #:nodoc: don't document this
       # translates the data structure derived from of tcpiputils's JSON reply
       def format_recs(reply_data, question, delta)
         recs = []
+        fieldname = nil
+        rrtype = nil
+        add_records = false
         reply_data.each do |key, data|
           case key
           when "ipv4"
-            data.each do |rec|
-              recs << PDNSResult.new(self.class.name, delta, question, rec["ip"], "A", nil, nil, rec["updatedate"], nil)
-            end
+            fieldname = "ip"
+            rrtype = "A"
+            add_records = true
           when "ipv6"
-            data.each do |rec|
-              recs << PDNSResult.new(self.class.name, delta, question, rec["ip"], "AAAA", nil, nil, rec["updatedate"], nil)
-            end
+            fieldname = "ip"
+            rrtype = "AAAA"
+            add_records = true
           when "dns"
-            data.each do |rec|
-              recs << PDNSResult.new(self.class.name, delta, question, rec["dns"], "NS", nil, nil, rec["updatedate"], nil)
-            end
+            fieldname = "dns"
+            rrtype = "NS"
+            add_records = true
           when "mx"
-            data.each do |rec|
-              recs << PDNSResult.new(self.class.name, delta, question, rec["dns"], "MX", nil, nil, rec["updatedate"], nil)
-            end
+            fieldname = "dns"
+            rrtype = "MX"
+            add_records = true
           when "domains"
             data.each do |rec|
+              lastseen = Date.parse(rec["updatedate"])
               recs << PDNSResult.new(self.class.name, delta, rec, question, "A", nil, nil, nil, nil)
+            end
+          end
+          if add_records
+            data.each do |rec|
+              lastseen = Date.parse(rec["updatedate"])
+              recs << PDNSResult.new(self.class.name, delta, question, rec[fieldname], rrtype, nil, nil, lastseen, nil)
             end
           end
         end

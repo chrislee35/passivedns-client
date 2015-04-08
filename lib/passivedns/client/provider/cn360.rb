@@ -82,27 +82,31 @@ module PassiveDNS #:nodoc: don't document this
         else
           recs
         end
+      end
       
-        private
+      private
       
-        # parses the response of 360.cn's JSON reply to generate an array of PDNSResult
-        def parse_json(page,query,response_time=0)
-    			res = []
-    			# need to remove the json_class tag or the parser will crap itself trying to find a class to align it to
-    			data = JSON.parse(page)
-          data.each do |row|
-            time_first = (row["time_first"]) ? Time.at(row["time_first"].to_i) : nil
-            time_last = (row["time_last"]) ? Time.at(row["time_last"].to_i) : nil
-            count = row["count"] || 0
-            res << PDNSResult.new(self.class.name, response_time, row["rrname"], row["rdata"], row["rrtype"], time_first, time_last, count)
-    			end
-    			res
-    		rescue Exception => e
-    			$stderr.puts "#{self.class.name} Exception: #{e}"
-    			raise e
-        end
-    
-      end      
+      # parses the response of 360.cn's JSON reply to generate an array of PDNSResult
+      def parse_json(page,query,response_time=0)
+  			res = []
+  			# need to remove the json_class tag or the parser will crap itself trying to find a class to align it to
+  			data = JSON.parse(page)
+        data.each do |row|
+          time_first = (row["time_first"]) ? Time.at(row["time_first"].to_i) : nil
+          time_last = (row["time_last"]) ? Time.at(row["time_last"].to_i) : nil
+          count = row["count"] || 0
+          query = row["rrname"]
+          answers = row["rdata"].gsub(/;$/,'').split(/;/)
+          rrtype = row["rrtype"]
+          answers.each do |answer|
+            res << PDNSResult.new(self.class.name, response_time, query, answer, rrtype, time_first, time_last, count)
+          end
+  			end
+  			res
+  		rescue Exception => e
+  			$stderr.puts "#{self.class.name} Exception: #{e}"
+  			raise e
+      end
     end
   end
 end

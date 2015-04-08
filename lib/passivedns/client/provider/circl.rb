@@ -95,9 +95,11 @@ module PassiveDNS #:nodoc: don't document this
   			# need to remove the json_class tag or the parser will crap itself trying to find a class to align it to
         page.split(/\n/).each do |line|
           row = JSON.parse(line)
+          firstseen = Time.at(row['time_first'].to_i)
+          lastseen = Time.at(row['time_last'].to_i)
   				res << PDNSResult.new(self.class.name,response_time,
             row['rrname'], row['rdata'], row['rrtype'], 0, 
-            row['time_first'], row['time_last'], row['count'])
+            firstseen, lastseen, row['count'])
         end
   			res
   		rescue Exception => e

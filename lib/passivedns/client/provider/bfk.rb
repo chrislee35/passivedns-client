@@ -88,7 +88,10 @@ module PassiveDNS #:nodoc: don't document this
   							######### FIX BLANKS FOR MX
 						
   					end
-  					res << PDNSResult.new(self.class.name,response_time,r[0],r[2],r[1])
+            query = r[0]
+            answer = r[2]
+            rrtype = r[1]
+  					res << PDNSResult.new(self.class.name,response_time,query,answer,rrtype)
   				end
   			end
   			res

@@ -83,7 +83,14 @@ module PassiveDNS #:nodoc: don't document this
   			if data['result']
   				data['result'].each do |row|
   					if row['query']
-  						res << PDNSResult.new(self.class.name,response_time,row['query'],row['answer'],row['type'].upcase,row['ttl'],row['first'],row['last'])
+              query = row['query']
+              answer = row['answer']
+              rrtype = row['type'].upcase
+              tty = row['ttl'].to_i
+              firstseen = row['first']
+              lastseen = row['last']
+  						res << PDNSResult.new(self.class.name,response_time,
+                query, answer, rrtype, ttl, firstseen, lastseen)
   					end
   				end
   			end

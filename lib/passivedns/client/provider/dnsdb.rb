@@ -90,12 +90,21 @@ module PassiveDNS #:nodoc: don't document this
   			rows = page.split(/\n/)
   			rows.each do |row|
   				record = JSON.parse(row)
-  				record['rdata'] = [record['rdata']] if record['rdata'].class == String
-  				record['rdata'].each do |rdata|
+          answers = record['rdata']
+  				answers = [record['rdata']] if record['rdata'].class == String
+          query = record['rrname'].gsub!(/\.$/,'')
+          rrtype = record['rrtype']
+          firstseen = Time.at(record['time_first'].to_i)
+          lastseen = Time.at(record['time_last'].to_i)
+          count = record['count']
+          
+  				answers.each do |answer|
+            answer.gsub!(/\.$/,'')
   					if record['time_first']
-  						res << PDNSResult.new(self.class.name,response_time,record['rrname'],rdata,record['rrtype'],0,Time.at(record['time_first'].to_i).utc.strftime("%Y-%m-%dT%H:%M:%SZ"),Time.at(record['time_last'].to_i).utc.strftime("%Y-%m-%dT%H:%M:%SZ"),record['count'])
+  						res << PDNSResult.new(self.class.name,response_time,query,answer,rrtype,
+                0,firstseen,lastseen,count)
   					else
-  						res << PDNSResult.new(self.class.name,response_time,record['rrname'],rdata,record['rrtype'])
+  						res << PDNSResult.new(self.class.name,response_time,query,answer,rrtype)
   					end
   				end
   			end

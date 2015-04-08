@@ -3,7 +3,7 @@
 require 'net/http'
 require 'net/https'
 require 'openssl'
-#require 'pp'
+require 'pp'
 
 module PassiveDNS #:nodoc: don't document this
   # The Provider module contains all the Passive DNS provider client code
@@ -103,19 +103,21 @@ module PassiveDNS #:nodoc: don't document this
     
       # parses the response of riskiq's JSON reply to generate an array of PDNSResult
   		def parse_json(page,query,response_time=0)
-        #pp page
    			res = []
   			# need to remove the json_class tag or the parser will crap itself trying to find a class to align it to
   			data = JSON.parse(page)
+        #pp data
   			if data['records']
           data['records'].each do |record|
-            name = record['name']
+            name = record['name'].gsub!(/\.$/,'')
             type = record['rrtype']
-            last_seen = record['lastSeen']
-            first_seen = record['firstSeen']
+            last_seen = Time.parse(record['lastSeen'].gsub(/\..*/,' +0000').gsub(/T/, ' '))
+            first_seen = Time.parse(record['firstSeen'].gsub(/\..*/,' +0000').gsub(/T/, ' '))
+            count = record['count']
             record['data'].each do |datum|
+              datum.gsub!(/\.$/,'')
     					res << PDNSResult.new(self.class.name,response_time,
-                name, datum, type, 0, first_seen, last_seen)
+                name, datum, type, 0, first_seen, last_seen, count)
             end
           end
         end

@@ -84,8 +84,8 @@ module PassiveDNS #:nodoc: don't document this
   			if data['results']
           query = data['results']['value']
   				data['results']['resolutions'].each do |row|
-            first_seen = row['firstSeen']
-            last_seen = row['lastSeen']
+            first_seen = Time.parse(row['firstSeen']+" +0000")
+            last_seen = Time.parse(row['lastSeen']+" +0000")
             value = row['value']
             source = row['source'].join(",")
   					res << PDNSResult.new(self.class.name+"/"+source,response_time,
