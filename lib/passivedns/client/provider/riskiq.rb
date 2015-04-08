@@ -111,8 +111,8 @@ module PassiveDNS #:nodoc: don't document this
           data['records'].each do |record|
             name = record['name'].gsub!(/\.$/,'')
             type = record['rrtype']
-            last_seen = Time.parse(record['lastSeen'].gsub(/\..*/,' +0000').gsub(/T/, ' '))
-            first_seen = Time.parse(record['firstSeen'].gsub(/\..*/,' +0000').gsub(/T/, ' '))
+            last_seen = Time.parse(record['lastSeen'])
+            first_seen = Time.parse(record['firstSeen'])
             count = record['count']
             record['data'].each do |datum|
               datum.gsub!(/\.$/,'')
