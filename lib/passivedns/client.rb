@@ -28,7 +28,12 @@ module PassiveDNS # :nodoc:
     # pdns        array of passivedns provider names, e.g., ["dnsdb","virustotal"]
     # configfile  filename of the passivedns-client configuration (this should probably be abstracted)
 		def initialize(pdns=$passivedns_providers, configfile="#{ENV['HOME']}/.passivedns-client")
-      cp = ConfigParser.new(configfile)
+      cp = {}
+      if File.exist?(configfile)
+        cp = ConfigParser.new(configfile)
+      else
+        $stderr.puts "Could not find config file at #{configfile}.  Using a blank configuration."
+      end
       # this creates a map of all the PassiveDNS provider names and their classes
       class_map = {}
       PassiveDNS::Provider.constants.each do |const|

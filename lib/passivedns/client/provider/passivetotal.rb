@@ -3,6 +3,7 @@
 require 'net/http'
 require 'net/https'
 require 'openssl'
+require 'pp'
 
 module PassiveDNS #:nodoc: don't document this
   # The Provider module contains all the Passive DNS provider client code
@@ -27,22 +28,33 @@ module PassiveDNS #:nodoc: don't document this
       # === Options
       # * :debug       Sets the debug flag for the module
       # * "APIKEY"     REQUIRED: The API key associated with PassiveTotal
-      # * "URL"      Alternate url for testing.  Defaults to "https://www.passivetotal.org/api/passive"
+      # * "URL"      Alternate url for testing.  Defaults to "https://www.passivetotal.org/api/v1/passive"
       #
       # === Example Instantiation
       #
       #   options = {
       #     :debug => true,
       #     "APIKEY" => "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-      #     "URL" => "https://www.passivetotal.org/api/passive"
+      #     "URL" => "https://www.passivetotal.org/api/v1/passive"
       #   }
+      
+      #   or
+      #
+      #   options = {
+      #     :debug => true,
+      #     "APIKEY" => "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      #     "API_VERSION" => "current"
+      #   }
+      #
+      #   then
       #
       #   PassiveDNS::Provider::PassiveTotal.new(options)
       #
   		def initialize(options={})
         @debug = options[:debug] || false
         @apikey = options["APIKEY"] || raise("#{self.class.name} requires an APIKEY")
-        @url = options["URL"] || "https://www.passivetotal.org/api/passive"
+        @version = options["API_VERSION"] || "v1"
+        @url = options["URL"] || "https://www.passivetotal.org/api/#{@version}/passive"
   		end
 
       # Takes a label (either a domain or an IP address) and returns
@@ -50,16 +62,16 @@ module PassiveDNS #:nodoc: don't document this
   		def lookup(label, limit=nil)
   			$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
   			Timeout::timeout(240) {
-  				url = @url
+  				url = @url+"?api_key=#{@apikey}&query=#{label}"
   				$stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
   				url = URI.parse url
   				http = Net::HTTP.new(url.host, url.port)
   				http.use_ssl = (url.scheme == 'https')
   				http.verify_mode = OpenSSL::SSL::VERIFY_NONE
   				http.verify_depth = 5
-  				request = Net::HTTP::Post.new(url.request_uri)
+  				request = Net::HTTP::Get.new(url.request_uri)
   				request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
-          request.set_form_data({"apikey" => @apikey, "value" => label})
+          #request.set_form_data({"api_key" => @apikey, "query" => label})
   				t1 = Time.now
   				response = http.request(request)
   				t2 = Time.now
@@ -79,13 +91,14 @@ module PassiveDNS #:nodoc: don't document this
       # parses the response of passivetotals's JSON reply to generate an array of PDNSResult
   		def parse_json(page,query,response_time=0)
    			res = []
+        puts page
   			data = JSON.parse(page)
+        query = data['raw_query']
   			if data['results']
-          query = data['results']['value']
-  				data['results']['resolutions'].each do |row|
+  				data['results']['records'].each do |row|
             first_seen = (row['firstSeen'] == "None") ? nil : Time.parse(row['firstSeen']+" +0000")
             last_seen = (row['lastSeen'] == "None") ? nil : Time.parse(row['lastSeen']+" +0000")
-            value = row['value']
+            value = row['resolve']
             source = row['source'].join(",")
   					res << PDNSResult.new(self.class.name+"/"+source,response_time,
               query, value, "A", 0, first_seen, last_seen)
