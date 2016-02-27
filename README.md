@@ -51,6 +51,7 @@ From version 2.0.0 on, all configuration keys for passive DNS providers are in o
 	[mnemonic]
 	APIKEY = 01234567890abcdef01234567890abcdef012345
 	[passivetotal]
+	USERNAME = tom@example.com
 	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 	[circl]
 	USERNAME = circl_user

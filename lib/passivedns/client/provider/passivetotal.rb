@@ -27,23 +27,25 @@ module PassiveDNS #:nodoc: don't document this
       attr_accessor :debug
       # === Options
       # * :debug       Sets the debug flag for the module
+      # * "USERNAME"   REQUIRED: The username for the associated API key
       # * "APIKEY"     REQUIRED: The API key associated with PassiveTotal
-      # * "URL"      Alternate url for testing.  Defaults to "https://www.passivetotal.org/api/v1/passive"
+      # * "URL"      Alternate url for testing.  Defaults to "https://api.passivetotal.org/v2/dns/passive"
       #
       # === Example Instantiation
       #
       #   options = {
       #     :debug => true,
+      #     "USERNAME" => "tom@example.com",
       #     "APIKEY" => "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-      #     "URL" => "https://www.passivetotal.org/api/v1/passive"
+      #     "URL" => "https://api.passivetotal.org/v2/dns/passive"
       #   }
       
       #   or
       #
       #   options = {
       #     :debug => true,
+      #     "USERNAME" => "tom@example.com"
       #     "APIKEY" => "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-      #     "API_VERSION" => "current"
       #   }
       #
       #   then
@@ -52,9 +54,9 @@ module PassiveDNS #:nodoc: don't document this
       #
   		def initialize(options={})
         @debug = options[:debug] || false
+        @username = options["USERNAME"] || raise("#{self.class.name} requires a USERNAME")
         @apikey = options["APIKEY"] || raise("#{self.class.name} requires an APIKEY")
-        @version = options["API_VERSION"] || "v1"
-        @url = options["URL"] || "https://www.passivetotal.org/api/#{@version}/passive"
+        @url = options["URL"] || "https://api.passivetotal.org/v2/dns/passive"
   		end
 
       # Takes a label (either a domain or an IP address) and returns
@@ -62,7 +64,7 @@ module PassiveDNS #:nodoc: don't document this
   		def lookup(label, limit=nil)
   			$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
   			Timeout::timeout(240) {
-  				url = @url+"?api_key=#{@apikey}&query=#{label}"
+  				url = @url+"?query=#{label}"
   				$stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
   				url = URI.parse url
   				http = Net::HTTP.new(url.host, url.port)
@@ -70,6 +72,7 @@ module PassiveDNS #:nodoc: don't document this
   				http.verify_mode = OpenSSL::SSL::VERIFY_NONE
   				http.verify_depth = 5
   				request = Net::HTTP::Get.new(url.request_uri)
+          request.basic_auth(@username, @apikey)
   				request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
           #request.set_form_data({"api_key" => @apikey, "query" => label})
   				t1 = Time.now
@@ -92,9 +95,9 @@ module PassiveDNS #:nodoc: don't document this
   		def parse_json(page,query,response_time=0)
    			res = []
   			data = JSON.parse(page)
-        query = data['raw_query']
+        query = data['queryValue']
   			if data['results']
-  				data['results']['records'].each do |row|
+  				data['results'].each do |row|
             first_seen = (row['firstSeen'] == "None") ? nil : Time.parse(row['firstSeen']+" +0000")
             last_seen = (row['lastSeen'] == "None") ? nil : Time.parse(row['lastSeen']+" +0000")
             value = row['resolve']
@@ -108,7 +111,6 @@ module PassiveDNS #:nodoc: don't document this
   			$stderr.puts "#{self.class.name} Exception: #{e}"
   			raise e
   		end
-
   	end
   end
 end
