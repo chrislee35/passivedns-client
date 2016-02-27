@@ -54,7 +54,7 @@ module PassiveDNS #:nodoc: don't document this
         @debug = options[:debug] || false
         @apikey = options["APIKEY"] || raise("#{self.class.name} requires an APIKEY")
         @version = options["API_VERSION"] || "v1"
-        @url = options["URL"] || "https://www.passivetotal.org/api/#{@version}/passive"
+        @url = options["URL"] || "https://api.passivetotal.org/api/#{@version}/passive"
   		end
 
       # Takes a label (either a domain or an IP address) and returns
