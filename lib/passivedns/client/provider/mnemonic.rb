@@ -8,7 +8,7 @@ module PassiveDNS #:nodoc: don't document this
   # The Provider module contains all the Passive DNS provider client code
   module Provider
     # Queries Mnemonic's passive DNS database
-  	class Mnemonic < PassiveDB
+    class Mnemonic < PassiveDB
       # Sets the modules self-reported name to "Mnemonic"
       def self.name
         "Mnemonic"
@@ -39,66 +39,66 @@ module PassiveDNS #:nodoc: don't document this
       #
       #   PassiveDNS::Provider::Mnemonic.new(options)
       #
-  		def initialize(options={})
+      def initialize(options={})
         @debug = options[:debug] || false
         @apikey = options["APIKEY"] || raise("#{self.class.name} requires an APIKEY")
         @url = options["URL"] || "https://passivedns.mnemonic.no/api1/?apikey="
-  		end
+      end
 
       # Takes a label (either a domain or an IP address) and returns
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
-  		def lookup(label, limit=nil)
-  			$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
-  			Timeout::timeout(240) {
-  				url = "#{@url}#{@apikey}&query=#{label}&method=exact"
-  				$stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
-  				url = URI.parse url
-  				http = Net::HTTP.new(url.host, url.port)
-  				http.use_ssl = (url.scheme == 'https')
-  				http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-  				http.verify_depth = 5
-  				request = Net::HTTP::Get.new(url.path+"?"+url.query)
-  				request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
-  				t1 = Time.now
-  				response = http.request(request)
-  				t2 = Time.now
-  				recs = parse_json(response.body, label, t2-t1)
-  				if limit
-  					recs[0,limit]
-  				else
-  					recs
-  				end
-  			}
-  		rescue Timeout::Error => e
-  			$stderr.puts "#{self.class.name} lookup timed out: #{label}"
-  		end
+      def lookup(label, limit=nil)
+        $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
+        Timeout::timeout(240) {
+          url = "#{@url}#{@apikey}&query=#{label}&method=exact"
+          $stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
+          url = URI.parse url
+          http = Net::HTTP.new(url.host, url.port)
+          http.use_ssl = (url.scheme == 'https')
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+          http.verify_depth = 5
+          request = Net::HTTP::Get.new(url.path+"?"+url.query)
+          request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
+          t1 = Time.now
+          response = http.request(request)
+          t2 = Time.now
+          recs = parse_json(response.body, label, t2-t1)
+          if limit
+            recs[0,limit]
+          else
+            recs
+          end
+        }
+      rescue Timeout::Error => e
+        $stderr.puts "#{self.class.name} lookup timed out: #{label}"
+      end
     
       private
     
       # parses the response of mnemonic's JSON reply to generate an array of PDNSResult
-  		def parse_json(page,query,response_time=0)
-  			res = []
-  			data = JSON.parse(page)
-  			if data['result']
-  				data['result'].each do |row|
-  					if row['query']
+      def parse_json(page,query,response_time=0)
+        res = []
+        data = JSON.parse(page)
+        if data['result']
+          data['result'].each do |row|
+            if row['query']
               query = row['query']
               answer = row['answer']
               rrtype = row['type'].upcase
               tty = row['ttl'].to_i
               firstseen = Time.at(row['first'].to_i)
               lastseen = Time.at(row['last'].to_i)
-  						res << PDNSResult.new(self.class.name,response_time,
+              res << PDNSResult.new(self.class.name,response_time,
                 query, answer, rrtype, ttl, firstseen, lastseen)
-  					end
-  				end
-  			end
-  			res
-  		rescue Exception => e
-  			$stderr.puts "#{self.class.name} Exception: #{e}"
-  			raise e
-  		end
+            end
+          end
+        end
+        res
+      rescue Exception => e
+        $stderr.puts "#{self.class.name} Exception: #{e}"
+        raise e
+      end
 
-  	end
+    end
   end
 end

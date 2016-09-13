@@ -9,7 +9,7 @@ module PassiveDNS #:nodoc: don't document this
   module Provider
     # Queries CIRCL.LU's passive DNS database
     # Circl is aliased by CIRCL
-  	class Circl < PassiveDB
+    class Circl < PassiveDB
       # Sets the modules self-reported name to "CIRCL"
       def self.name
         "CIRCL"
@@ -45,68 +45,68 @@ module PassiveDNS #:nodoc: don't document this
       #
       #   PassiveDNS::Provider::CIRCL.new(options)
       #
-  		def initialize(options={})
+      def initialize(options={})
         @debug = options[:debug] || false
         @username = options["USERNAME"]
         @password = options["PASSWORD"]
         @auth_token = options["AUTH_TOKEN"]
         @url = options["URL"] || "https://www.circl.lu/pdns/query"
-  		end
+      end
 
       # Takes a label (either a domain or an IP address) and returns
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
-  		def lookup(label, limit=nil)
-  			$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
-  			Timeout::timeout(240) {
-  				url = @url+"/"+label
-  				$stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
-  				url = URI.parse url
-  				http = Net::HTTP.new(url.host, url.port)
-  				http.use_ssl = (url.scheme == 'https')
-  				http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-  				http.verify_depth = 5
-  				request = Net::HTTP::Get.new(url.request_uri)
-  				request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
+      def lookup(label, limit=nil)
+        $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
+        Timeout::timeout(240) {
+          url = @url+"/"+label
+          $stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
+          url = URI.parse url
+          http = Net::HTTP.new(url.host, url.port)
+          http.use_ssl = (url.scheme == 'https')
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+          http.verify_depth = 5
+          request = Net::HTTP::Get.new(url.request_uri)
+          request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
           if @username
             request.basic_auth(@username, @password)
           end
           if @auth_token
             request.add_field("Authorization", @auth_token)
           end
-  				t1 = Time.now
-  				response = http.request(request)
-  				t2 = Time.now
-  				recs = parse_json(response.body, label, t2-t1)
-  				if limit
-  					recs[0,limit]
-  				else
-  					recs
-  				end
-  			}
-  		rescue Timeout::Error => e
-  			$stderr.puts "#{self.class.name} lookup timed out: #{label}"
-  		end
+          t1 = Time.now
+          response = http.request(request)
+          t2 = Time.now
+          recs = parse_json(response.body, label, t2-t1)
+          if limit
+            recs[0,limit]
+          else
+            recs
+          end
+        }
+      rescue Timeout::Error => e
+        $stderr.puts "#{self.class.name} lookup timed out: #{label}"
+      end
 
       private
 
       # parses the response of circl's JSON reply to generate an array of PDNSResult
-  		def parse_json(page,query,response_time=0)
-   			res = []
+      def parse_json(page,query,response_time=0)
+         res = []
         page.split(/\n/).each do |line|
           row = JSON.parse(line)
           firstseen = Time.at(row['time_first'].to_i)
           lastseen = Time.at(row['time_last'].to_i)
-  				res << PDNSResult.new(self.class.name,response_time,
+          res << PDNSResult.new(self.class.name,response_time,
             row['rrname'], row['rdata'], row['rrtype'], 0, 
             firstseen, lastseen, row['count'])
         end
-  			res
-  		rescue Exception => e
-  			$stderr.puts "#{self.class.name} Exception: #{e}"
-  			raise e
-  		end
+        res
+      rescue Exception => e
+        $stderr.puts "#{self.class.name} Exception: #{e}"
+        raise e
+      end
 
-  	end
+    end
     CIRCL = PassiveDNS::Provider::Circl
   end
 end

@@ -9,7 +9,7 @@ module PassiveDNS #:nodoc: don't document this
   # The Provider module contains all the Passive DNS provider client code
   module Provider
     # Queries PassiveTotal's passive DNS database
-  	class PassiveTotal < PassiveDB
+    class PassiveTotal < PassiveDB
       # Sets the modules self-reported name to "PassiveTotal"
       def self.name
         "PassiveTotal"
@@ -52,65 +52,65 @@ module PassiveDNS #:nodoc: don't document this
       #
       #   PassiveDNS::Provider::PassiveTotal.new(options)
       #
-  		def initialize(options={})
+      def initialize(options={})
         @debug = options[:debug] || false
         @username = options["USERNAME"] || raise("#{self.class.name} requires a USERNAME")
         @apikey = options["APIKEY"] || raise("#{self.class.name} requires an APIKEY")
         @url = options["URL"] || "https://api.passivetotal.org/v2/dns/passive"
-  		end
+      end
 
       # Takes a label (either a domain or an IP address) and returns
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
-  		def lookup(label, limit=nil)
-  			$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
-  			Timeout::timeout(240) {
-  				url = @url+"?query=#{label}"
-  				$stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
-  				url = URI.parse url
-  				http = Net::HTTP.new(url.host, url.port)
-  				http.use_ssl = (url.scheme == 'https')
-  				http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-  				http.verify_depth = 5
-  				request = Net::HTTP::Get.new(url.request_uri)
+      def lookup(label, limit=nil)
+        $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
+        Timeout::timeout(240) {
+          url = @url+"?query=#{label}"
+          $stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
+          url = URI.parse url
+          http = Net::HTTP.new(url.host, url.port)
+          http.use_ssl = (url.scheme == 'https')
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+          http.verify_depth = 5
+          request = Net::HTTP::Get.new(url.request_uri)
           request.basic_auth(@username, @apikey)
-  				request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
+          request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
           #request.set_form_data({"api_key" => @apikey, "query" => label})
-  				t1 = Time.now
-  				response = http.request(request)
-  				t2 = Time.now
-  				recs = parse_json(response.body, label, t2-t1)
-  				if limit
-  					recs[0,limit]
-  				else
-  					recs
-  				end
-  			}
-  		rescue Timeout::Error => e
-  			$stderr.puts "#{self.class.name} lookup timed out: #{label}"
-  		end
+          t1 = Time.now
+          response = http.request(request)
+          t2 = Time.now
+          recs = parse_json(response.body, label, t2-t1)
+          if limit
+            recs[0,limit]
+          else
+            recs
+          end
+        }
+      rescue Timeout::Error => e
+        $stderr.puts "#{self.class.name} lookup timed out: #{label}"
+      end
     
       private
     
       # parses the response of passivetotals's JSON reply to generate an array of PDNSResult
-  		def parse_json(page,query,response_time=0)
-   			res = []
-  			data = JSON.parse(page)
+      def parse_json(page,query,response_time=0)
+         res = []
+        data = JSON.parse(page)
         query = data['queryValue']
-  			if data['results']
-  				data['results'].each do |row|
+        if data['results']
+          data['results'].each do |row|
             first_seen = (row['firstSeen'] == "None") ? nil : Time.parse(row['firstSeen']+" +0000")
             last_seen = (row['lastSeen'] == "None") ? nil : Time.parse(row['lastSeen']+" +0000")
             value = row['resolve']
             source = row['source'].join(",")
-  					res << PDNSResult.new(self.class.name+"/"+source,response_time,
+            res << PDNSResult.new(self.class.name+"/"+source,response_time,
               query, value, "A", 0, first_seen, last_seen)
-  				end
-  			end
-  			res
-  		rescue Exception => e
-  			$stderr.puts "#{self.class.name} Exception: #{e}"
-  			raise e
-  		end
-  	end
+          end
+        end
+        res
+      rescue Exception => e
+        $stderr.puts "#{self.class.name} Exception: #{e}"
+        raise e
+      end
+    end
   end
 end

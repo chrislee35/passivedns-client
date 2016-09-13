@@ -19,15 +19,15 @@ require 'configparser'
 
 module PassiveDNS # :nodoc:
   # struct to contain the results from a PassiveDNS lookup
-	class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count); end
+  class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count); end
 
   # coodinates the lookups accross all configured PassiveDNS providers
-	class Client
+  class Client
     
     # instantiate and configure all specified PassiveDNS providers
     # pdns        array of passivedns provider names, e.g., ["dnsdb","virustotal"]
     # configfile  filename of the passivedns-client configuration (this should probably be abstracted)
-		def initialize(pdns=$passivedns_providers, configfile="#{ENV['HOME']}/.passivedns-client")
+    def initialize(pdns=$passivedns_providers, configfile="#{ENV['HOME']}/.passivedns-client")
       cp = {}
       if File.exist?(configfile)
         cp = ConfigParser.new(configfile)
@@ -42,7 +42,7 @@ module PassiveDNS # :nodoc:
         end
       end
       
-			@pdnsdbs = []
+      @pdnsdbs = []
       pdns.uniq.each do |pd|
         if class_map[pd]
           @pdnsdbs << class_map[pd].new(cp[pd] || {})
@@ -51,38 +51,38 @@ module PassiveDNS # :nodoc:
         end
       end
 
-		end #initialize
-		
+    end #initialize
+    
     # set the debug flag
-		def debug=(d)
-			@pdnsdbs.each do |pdnsdb|
-				pdnsdb.debug = d
-			end
-		end
-		
+    def debug=(d)
+      @pdnsdbs.each do |pdnsdb|
+        pdnsdb.debug = d
+      end
+    end
+    
     # perform the query lookup accross all configured PassiveDNS providers
-		def query(item, limit=nil)
-			threads = []
-			@pdnsdbs.each do |pdnsdb|
-				threads << Thread.new(item) do |q|
-					pdnsdb.lookup(q, limit)
-				end
-			end
-				
-			results = []
-			threads.each do |thr|
-				rv = thr.join.value
-				if rv
-					rv.each do |r|
-						if ["A","AAAA","NS","CNAME","PTR"].index(r.rrtype)
-							results << r
-						end
-					end
-				end
-			end
-			
-			return results
-		end #query
-		
-	end # Client
+    def query(item, limit=nil)
+      threads = []
+      @pdnsdbs.each do |pdnsdb|
+        threads << Thread.new(item) do |q|
+          pdnsdb.lookup(q, limit)
+        end
+      end
+        
+      results = []
+      threads.each do |thr|
+        rv = thr.join.value
+        if rv
+          rv.each do |r|
+            if ["A","AAAA","NS","CNAME","PTR"].index(r.rrtype)
+              results << r
+            end
+          end
+        end
+      end
+      
+      return results
+    end #query
+    
+  end # Client
 end # PassiveDNS

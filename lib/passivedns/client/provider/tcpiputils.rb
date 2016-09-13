@@ -54,17 +54,17 @@ module PassiveDNS #:nodoc: don't document this
         url = "#{@url}#{@apikey}&type=#{type}&q=#{label}"
         recs = []
         Timeout::timeout(240) {
-  				url = URI.parse url
-  				http = Net::HTTP.new(url.host, url.port)
-  				http.use_ssl = (url.scheme == 'https')
-  				http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-  				http.verify_depth = 5
-  				request = Net::HTTP::Get.new(url.path+"?"+url.query)
-  				request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
-  				t1 = Time.now
-  				response = http.request(request)
-  				delta = (Time.now - t1).to_f
-  				reply = JSON.parse(response.body)
+          url = URI.parse url
+          http = Net::HTTP.new(url.host, url.port)
+          http.use_ssl = (url.scheme == 'https')
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+          http.verify_depth = 5
+          request = Net::HTTP::Get.new(url.path+"?"+url.query)
+          request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
+          t1 = Time.now
+          response = http.request(request)
+          delta = (Time.now - t1).to_f
+          reply = JSON.parse(response.body)
           if reply["status"] and reply["status"] == "succeed"
             question = reply["data"]["question"]
             recs = format_recs(reply["data"], question, delta)
@@ -76,10 +76,10 @@ module PassiveDNS #:nodoc: don't document this
           else
             recs
           end
-  			}
-  		rescue Timeout::Error => e
-  			$stderr.puts "#{self.class.name} lookup timed out: #{label}"
-  		end
+        }
+      rescue Timeout::Error => e
+        $stderr.puts "#{self.class.name} lookup timed out: #{label}"
+      end
     
       private
     
