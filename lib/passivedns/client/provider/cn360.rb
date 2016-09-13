@@ -61,22 +61,22 @@ module PassiveDNS #:nodoc: don't document this
         limit ||= 10000
         path = "/api/#{table}/keyword/#{label}/count/#{limit}/"
         url = @cp["API"]+path
-  			url = URI.parse url
-  			http = Net::HTTP.new(url.host, url.port)
-  			http.use_ssl = (url.scheme == 'https')
-  			http.verify_mode = OpenSSL::SSL::VERIFY_NONE # I hate doing this
-  			http.verify_depth = 5
-  			request = Net::HTTP::Get.new(url.path)
-  			request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
+        url = URI.parse url
+        http = Net::HTTP.new(url.host, url.port)
+        http.use_ssl = (url.scheme == 'https')
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE # I hate doing this
+        http.verify_depth = 5
+        request = Net::HTTP::Get.new(url.path)
+        request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
         request.add_field('Accept', 'application/json')
         request.add_field("X-BashTokid", @cp["API_ID"])
         token = Digest::MD5.hexdigest(path+@cp["API_KEY"])
-  			$stderr.puts "DEBUG: cn360 url = #{url} token = #{token}" if @debug
+        $stderr.puts "DEBUG: cn360 url = #{url} token = #{token}" if @debug
         request.add_field("X-BashToken", token)
-  			t1 = Time.now
-  			response = http.request(request)
-  			t2 = Time.now
-  			recs = parse_json(response.body, label, t2-t1)
+        t1 = Time.now
+        response = http.request(request)
+        t2 = Time.now
+        recs = parse_json(response.body, label, t2-t1)
         if limit
           recs[0,limit]
         else
@@ -88,8 +88,8 @@ module PassiveDNS #:nodoc: don't document this
       
       # parses the response of 360.cn's JSON reply to generate an array of PDNSResult
       def parse_json(page,query,response_time=0)
-  			res = []
-  			data = JSON.parse(page)
+        res = []
+        data = JSON.parse(page)
         data.each do |row|
           time_first = (row["time_first"]) ? Time.at(row["time_first"].to_i) : nil
           time_last = (row["time_last"]) ? Time.at(row["time_last"].to_i) : nil
@@ -100,11 +100,11 @@ module PassiveDNS #:nodoc: don't document this
           answers.each do |answer|
             res << PDNSResult.new(self.class.name, response_time, query, answer, rrtype, time_first, time_last, count)
           end
-  			end
-  			res
-  		rescue Exception => e
-  			$stderr.puts "#{self.class.name} Exception: #{e}"
-  			raise e
+        end
+        res
+      rescue Exception => e
+        $stderr.puts "#{self.class.name} Exception: #{e}"
+        raise e
       end
     end
   end
