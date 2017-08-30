@@ -98,7 +98,7 @@ module PassiveDNS #:nodoc: don't document this
           answers = row["rdata"].gsub(/;$/,'').split(/;/)
           rrtype = row["rrtype"]
           answers.each do |answer|
-            res << PDNSResult.new(self.class.name, response_time, query, answer, rrtype, time_first, time_last, count)
+            res << PDNSResult.new(self.class.name, response_time, query, answer, rrtype, time_first, time_last, count, 'yellow')
           end
         end
         res

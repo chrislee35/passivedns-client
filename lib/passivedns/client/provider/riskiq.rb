@@ -115,7 +115,7 @@ module PassiveDNS #:nodoc: don't document this
             record['data'].each do |datum|
               datum.gsub!(/\.$/,'')
               res << PDNSResult.new(self.class.name,response_time,
-                name, datum, type, 0, first_seen, last_seen, count)
+                name, datum, type, 0, first_seen, last_seen, count, 'yellow')
             end
           end
         end

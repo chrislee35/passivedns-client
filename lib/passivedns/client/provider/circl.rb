@@ -98,7 +98,7 @@ module PassiveDNS #:nodoc: don't document this
           lastseen = Time.at(row['time_last'].to_i)
           res << PDNSResult.new(self.class.name,response_time,
             row['rrname'], row['rdata'], row['rrtype'], 0, 
-            firstseen, lastseen, row['count'])
+            firstseen, lastseen, row['count'], 'yellow')
         end
         res
       rescue Exception => e

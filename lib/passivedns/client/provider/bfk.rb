@@ -84,7 +84,7 @@ module PassiveDNS #:nodoc: don't document this
               #  r[2] = s[1]
               r[2] =~ /[0-9]+?\s(.+)/
               s=$1
-              puts "DEBUG: == BFK: MX Parsing Strip: Answer: " + r[2] + " : mod: " + s if @debug
+              #puts "DEBUG: == BFK: MX Parsing Strip: Answer: " + r[2] + " : mod: " + s if @debug
               r[2] = s
             
                 ######### FIX BLANKS FOR MX
@@ -93,7 +93,7 @@ module PassiveDNS #:nodoc: don't document this
             query = r[0]
             answer = r[2]
             rrtype = r[1]
-            res << PDNSResult.new(self.class.name,response_time,query,answer,rrtype)
+            res << PDNSResult.new(self.class.name,response_time,query,answer,rrtype,'white')
           end
         end
         res

@@ -101,7 +101,7 @@ module PassiveDNS #:nodoc: don't document this
             answer.gsub!(/\.$/,'')
             if record['time_first']
               res << PDNSResult.new(self.class.name,response_time,query,answer,rrtype,
-                0,firstseen,lastseen,count)
+                0,firstseen,lastseen,count, 'yellow')
             else
               res << PDNSResult.new(self.class.name,response_time,query,answer,rrtype)
             end

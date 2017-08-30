@@ -18,8 +18,40 @@ end
 require 'configparser'
 
 module PassiveDNS # :nodoc:
+  
+  class SecurityControl
+    def allow(user_level)
+      raise "unimplemented"
+    end
+  end
+  
+  class TLPSecurityControl < SecurityControl
+    LEVELS = ['white','green','yellow','red']
+    
+    def initialize(tlp)
+      if tlp =~ /(white|green|yellow|red)/i
+        @tlp = tlp.downcase
+        @tlp_level = LEVELS.index(@tlp)
+      else
+        raise "Unknown TLP setting, #{tlp}"
+      end
+    end
+    
+    def allow(user_level)
+      user_level = LEVELS.index(user_level.downcase)
+      if user_level == nil
+        raise "Invalid user level, #{user_level}"
+      end
+      return(user_level >= @tlp_level)
+    end
+    
+    def to_s()
+      @tlp
+    end
+  end
+  
   # struct to contain the results from a PassiveDNS lookup
-  class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count); end
+  class PDNSResult < Struct.new(:source, :response_time, :query, :answer, :rrtype, :ttl, :firstseen, :lastseen, :count, :security); end
 
   # coodinates the lookups accross all configured PassiveDNS providers
   class Client

@@ -110,13 +110,13 @@ module PassiveDNS #:nodoc: don't document this
           when "domains"
             data.each do |rec|
               lastseen = (rec["updatedate"]) ? Date.parse(rec["updatedate"]) : nil
-              recs << PDNSResult.new(self.class.name, delta, rec, question, "A", nil, nil, nil, nil)
+              recs << PDNSResult.new(self.class.name, delta, rec, question, "A", nil, nil, nil, nil, 'yellow')
             end
           end
           if add_records
             data.each do |rec|
               lastseen = (rec["updatedate"]) ? Date.parse(rec["updatedate"]) : nil
-              recs << PDNSResult.new(self.class.name, delta, question, rec[fieldname], rrtype, nil, nil, lastseen, nil)
+              recs << PDNSResult.new(self.class.name, delta, question, rec[fieldname], rrtype, nil, nil, lastseen, nil, 'yellow')
             end
           end
         end

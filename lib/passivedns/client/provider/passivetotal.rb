@@ -103,7 +103,7 @@ module PassiveDNS #:nodoc: don't document this
             value = row['resolve']
             source = row['source'].join(",")
             res << PDNSResult.new(self.class.name+"/"+source,response_time,
-              query, value, "A", 0, first_seen, last_seen)
+              query, value, "A", 0, first_seen, last_seen, 'yellow')
           end
         end
         res

@@ -88,9 +88,9 @@ module PassiveDNS #:nodoc: don't document this
           data['resolutions'].each do |row|
             lastseen = Time.parse(row['last_resolved']+" +0000")
             if row['ip_address']
-              res << PDNSResult.new(self.class.name,response_time,query,row['ip_address'],'A',nil,nil,lastseen)
+              res << PDNSResult.new(self.class.name,response_time,query,row['ip_address'],'A',nil,nil,lastseen, 'yellow')
             elsif row['hostname']
-              res << PDNSResult.new(self.class.name,response_time,row['hostname'],query,'A',nil,nil,lastseen)
+              res << PDNSResult.new(self.class.name,response_time,row['hostname'],query,'A',nil,nil,lastseen, 'yellow')
             end
           end
         end
