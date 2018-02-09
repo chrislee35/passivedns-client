@@ -18,12 +18,12 @@ Gem::Specification.new do |spec|
 	spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
 	spec.require_paths = ["lib"]
 
-	spec.add_runtime_dependency 'json', '>= 1.4.3'
-	spec.add_runtime_dependency 'sqlite3', '>= 1.3.3'
-	spec.add_runtime_dependency 'structformatter', '~> 0.0.1'
-  spec.add_runtime_dependency 'configparser', '~> 0.1.3'
-  spec.add_development_dependency "minitest", "~> 5.5"
-	spec.add_development_dependency "bundler", "~> 1.3"
+	spec.add_runtime_dependency 'json'
+	spec.add_runtime_dependency 'sqlite3'
+	spec.add_runtime_dependency 'structformatter'
+  spec.add_runtime_dependency 'configparser'
+  spec.add_development_dependency "minitest"
+	spec.add_development_dependency "bundler"
 	spec.add_development_dependency "rake"
 
 	#spec.signing_key   = "#{File.dirname(__FILE__)}/../gem-private_key.pem"
