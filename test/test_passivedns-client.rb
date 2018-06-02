@@ -47,22 +47,28 @@ class TestPassiveDnsQuery < Minitest::Test
 	end
 	
 	def test_BFK
-    PassiveDNS::Client.new(['bfk'])
-    d = PassiveDNS::Provider::BFK.new(@cp['bfk'] || {})
-    refute_nil(d)
-		rows = d.lookup("example.org",3)
-		refute_nil(rows)
-		refute_nil(rows.to_s)
-		refute_nil(rows.to_xml)
-		refute_nil(rows.to_json)
-		refute_nil(rows.to_yaml)
-    assert_equal(3, rows.length)
-    rows = d.lookup("8.8.8.8")
-    refute_nil(rows)
-    refute_nil(rows.to_s)
-    refute_nil(rows.to_xml)
-    refute_nil(rows.to_json)
-    refute_nil(rows.to_yaml)
+    assert_raises RuntimeError do
+      PassiveDNS::Client.new(['bfk'])
+    end
+    
+    assert_raises RuntimeError do
+      d = PassiveDNS::Provider::BFK.new(@cp['bfk'] || {})
+    end
+    
+    # refute_nil(d)
+    # rows = d.lookup("example.org",3)
+    # refute_nil(rows)
+    # refute_nil(rows.to_s)
+    # refute_nil(rows.to_xml)
+    # refute_nil(rows.to_json)
+    # refute_nil(rows.to_yaml)
+    # assert_equal(3, rows.length)
+    # rows = d.lookup("8.8.8.8")
+    # refute_nil(rows)
+    # refute_nil(rows.to_s)
+    # refute_nil(rows.to_xml)
+    # refute_nil(rows.to_json)
+    # refute_nil(rows.to_yaml)
 	end
 	
 	def test_DNSDB

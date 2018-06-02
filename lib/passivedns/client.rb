@@ -12,7 +12,9 @@ provider_path = File.dirname(__FILE__)+"/client/provider/*.rb"
 Dir.glob(provider_path).each do |provider|
   name = File.basename(provider, '.rb')
   require "passivedns/client/provider/#{name}.rb"
-  $passivedns_providers << name
+  if name != 'bfk'
+    $passivedns_providers << name
+  end
 end
 
 require 'configparser'

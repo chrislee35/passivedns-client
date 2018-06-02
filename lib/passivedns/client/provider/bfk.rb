@@ -37,6 +37,7 @@ module PassiveDNS #:nodoc: don't document this
       def initialize(options={})
         @debug = options[:debug] || false
         @base = options["URL"] || "http://www.bfk.de/bfk_dnslogger.html?query="
+        raise "Due to the EU GDPR policy, this service has been shut down until further notice."
       end
     
       # Takes a label (either a domain or an IP address) and returns

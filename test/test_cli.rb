@@ -20,7 +20,7 @@ class TestCLI < Minitest::Test
     helptext = PassiveDNS::CLI.run(["--help"])
     helptext.gsub!(/Usage: .*?\[/, "Usage: [")
     assert_equal(
-"Usage: [-d [3bcdmprtv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>
+"Usage: [-d [3bcdmprtv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] [--config <file>] <ip|domain|cidr>
 Passive DNS Providers
   -d3bcdmprtv uses all of the available passive dns database
   -d3 use 360.cn
@@ -201,5 +201,27 @@ Getting Help
     options, items = PassiveDNS::CLI.parse_command_line(["-dptv", "-f", "test.db", "-r", "5", "-w", "30", "-l", "10", "8.8.8.8"])
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
+  end
+  
+  def test_configuration_file
+    options_target = {
+      :pdnsdbs => ["bfk"],
+      :format => "text",
+      :sep => "\t",
+      :recursedepth => 1,
+      :wait => 0,
+      :res => nil,
+      :debug => false,
+      :sqlitedb => nil,
+      :limit => nil,
+      :help => false,
+      :configfile => ".passivedns-client"
+    }
+    
+    
+    options, items = PassiveDNS::CLI.parse_command_line(["--config", ".passivedns-client"])
+    assert_equal(options_target, options)
+    assert_equal([], items)
+    
   end
 end
