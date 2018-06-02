@@ -58,7 +58,8 @@ module PassiveDNS # :nodoc:
         [ '--sqlite3', '-f', GetoptLong::REQUIRED_ARGUMENT ],
         [ '--recurse', '-r', GetoptLong::REQUIRED_ARGUMENT ],
         [ '--wait', '-w', GetoptLong::REQUIRED_ARGUMENT ],
-        [ '--limit', '-l', GetoptLong::REQUIRED_ARGUMENT ]
+        [ '--limit', '-l', GetoptLong::REQUIRED_ARGUMENT ],
+        [ '--config', GetoptLong::REQUIRED_ARGUMENT ]
       )
 
       letter_map = get_letter_map
@@ -121,6 +122,8 @@ module PassiveDNS # :nodoc:
           options[:sqlitedb] = arg
         when '--limit'
           options[:limit] = arg.to_i
+        when '--config'
+          options[:configfile] = arg
         else
           options[:help] = true
         end
@@ -158,7 +161,7 @@ module PassiveDNS # :nodoc:
     def self.usage(letter_map)
       databases = letter_map.keys.sort.join("")
       help_text = ""
-      help_text << "Usage: #{$0} [-d [#{databases}]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>\n"
+      help_text << "Usage: #{$0} [-d [#{databases}]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] [--config <file>] <ip|domain|cidr>\n"
       help_text << "Passive DNS Providers\n"
       help_text << "  -d#{databases} uses all of the available passive dns database\n"
       letter_map.keys.sort.each do |l|
@@ -264,7 +267,7 @@ module PassiveDNS # :nodoc:
       state = create_state(options[:sqlitedb])
       state.debug = options[:debug]
 
-      pdnsclient = PassiveDNS::Client.new(options[:pdnsdbs])
+      pdnsclient = PassiveDNS::Client.new(options[:pdnsdbs], options[:configfile])
       pdnsclient.debug = options[:debug]
       
       if items.length > 0
