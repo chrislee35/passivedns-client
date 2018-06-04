@@ -55,8 +55,9 @@ module PassiveDNS #:nodoc: don't document this
 
       # Takes a label (either a domain or an IP address) and returns
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
-      def lookup(label, limit=nil)
-        $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
+      def lookup(label, limit=nil, round=1)
+        return if round == 10
+        $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label}) (round #{round})" if @debug
         Timeout::timeout(240) {
           url = @url+"/"+label
           $stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
@@ -79,7 +80,7 @@ module PassiveDNS #:nodoc: don't document this
           body = response.body
           if body == "Rate Limit Exceeded"
             $stderr.puts "DEBUG: Rate Limit Exceeded. Retrying #{label}" if @debug
-            lookup(label, limit)
+            lookup(label, limit, round + 1)
           else
             recs = parse_json(body, label, t2-t1)
             if limit
