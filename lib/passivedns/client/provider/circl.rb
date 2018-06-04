@@ -76,11 +76,17 @@ module PassiveDNS #:nodoc: don't document this
           t1 = Time.now
           response = http.request(request)
           t2 = Time.now
-          recs = parse_json(response.body, label, t2-t1)
-          if limit
-            recs[0,limit]
+          body = response.body
+          if body == "Rate Limit Exceeded"
+            $stderr.puts "DEBUG: Rate Limit Exceeded. Retrying #{label}" if @debug
+            lookup(label, limit)
           else
-            recs
+            recs = parse_json(body, label, t2-t1)
+            if limit
+              recs[0,limit]
+            else
+              recs
+            end
           end
         }
       rescue Timeout::Error => e
@@ -91,7 +97,7 @@ module PassiveDNS #:nodoc: don't document this
 
       # parses the response of circl's JSON reply to generate an array of PDNSResult
       def parse_json(page,query,response_time=0)
-         res = []
+        res = []
         page.split(/\n/).each do |line|
           row = JSON.parse(line)
           firstseen = Time.at(row['time_first'].to_i)
