@@ -57,7 +57,12 @@ module PassiveDNS #:nodoc: don't document this
             url = "#{@url}domain/report?domain=#{label}&apikey=#{@apikey}"
           end
           $stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
-          url = URI.parse url
+          begin
+            url = URI.parse url
+          rescue URI::InvalidURIError
+            $stderr.puts "ERROR: Invalid address: #{url}"
+            return
+          end
           http = Net::HTTP.new(url.host, url.port)
           http.use_ssl = (url.scheme == 'https')
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
