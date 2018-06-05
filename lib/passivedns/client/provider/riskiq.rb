@@ -112,8 +112,14 @@ module PassiveDNS #:nodoc: don't document this
 
       # parses the response of riskiq's JSON reply to generate an array of PDNSResult
       def parse_json(page,query,response_time=0)
-         res = []
+        res = []
         data = JSON.parse(page)
+        if data['message']
+          if data['message'] =~ /quota_exceeded/
+            $stderr.puts "ERROR: quota exceeded."
+            return res
+          end
+        end
         if data['records']
           data['records'].each do |record|
             name = record['name'].gsub!(/\.$/,'')
