@@ -57,10 +57,16 @@ module PassiveDNS #:nodoc: don't document this
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
       def lookup(label, limit=nil)
         $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
+        recs = []
         Timeout::timeout(240) {
           url = @url+"/"+label
           $stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
-          url = URI.parse url
+          begin
+            url = URI.parse url
+          rescue URI::InvalidURIError
+            $stderr.puts "ERROR: Invalid address: #{url}"
+            return recs
+          end
           http = Net::HTTP.new(url.host, url.port)
           http.use_ssl = (url.scheme == 'https')
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -74,9 +80,17 @@ module PassiveDNS #:nodoc: don't document this
             request.add_field("Authorization", @auth_token)
           end
           t1 = Time.now
-          response = http.request(request)
-          t2 = Time.now
-          recs = parse_json(response.body, label, t2-t1)
+          0.upto(9) do
+            response = http.request(request)
+            body = response.body
+            if body == "Rate Limit Exceeded"
+              $stderr.puts "DEBUG: Rate Limit Exceeded. Retrying #{label}" if @debug
+            else
+              t2 = Time.now
+              recs  = parse_json(response.body, label, t2-t1)
+              break
+            end
+          end
           if limit
             recs[0,limit]
           else
@@ -85,6 +99,7 @@ module PassiveDNS #:nodoc: don't document this
         }
       rescue Timeout::Error => e
         $stderr.puts "#{self.class.name} lookup timed out: #{label}"
+        recs
       end
 
       private
