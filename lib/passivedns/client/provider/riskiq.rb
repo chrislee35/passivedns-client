@@ -48,8 +48,8 @@ module PassiveDNS #:nodoc: don't document this
         @debug = options[:debug] || false
         @token = options["API_TOKEN"] || raise("#{self.class.name} requires an API_TOKEN")
         @privkey = options["API_PRIVATE_KEY"] || raise("#{self.class.name} requires an API_PRIVATE_KEY")
-        @server = options["API_SERVER"] || "ws.riskiq.net"
         @version = options["API_VERSION"] || "v1"
+        @server = options["API_SERVER"] || api_settings[@version][:server]
         @url = "https://#{@server}/#{@version}"
       end
 
@@ -65,8 +65,10 @@ module PassiveDNS #:nodoc: don't document this
             url = @url+"/dns/data"
             params["ip"] = label 
           else
-            url = @url+"/dns/name"
-            params["name"] = label
+            resource = api_settings[@version][:resource]
+            param = api_settings[@version][:param]
+            url = @url+"/dns/#{resource}"
+            params[param] = label
           end
           url << "?"
           params.each do |k,v|
@@ -101,10 +103,23 @@ module PassiveDNS #:nodoc: don't document this
     
       private
     
+      def api_settings
+        @api_settings ||= {
+          'v1' => { server: "ws.riskiq.net", resource: 'name', param: 'name' },
+          'v2' => { server: "api.passivetotal.org", resource: 'passive', param: 'query' }
+        }
+      end
+
       # parses the response of riskiq's JSON reply to generate an array of PDNSResult
       def parse_json(page,query,response_time=0)
-         res = []
+        res = []
         data = JSON.parse(page)
+        if data['message']
+          if data['message'] =~ /quota_exceeded/
+            $stderr.puts "ERROR: quota exceeded."
+            return res
+          end
+        end
         if data['records']
           data['records'].each do |record|
             name = record['name'].gsub!(/\.$/,'')
