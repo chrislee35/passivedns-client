@@ -57,7 +57,12 @@ module PassiveDNS #:nodoc: don't document this
             url = "#{@url}domain/report?domain=#{label}&apikey=#{@apikey}"
           end
           $stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
-          url = URI.parse url
+          begin
+            url = URI.parse url
+          rescue URI::InvalidURIError
+            $stderr.puts "ERROR: Invalid address: #{url}"
+            return
+          end
           http = Net::HTTP.new(url.host, url.port)
           http.use_ssl = (url.scheme == 'https')
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -83,6 +88,7 @@ module PassiveDNS #:nodoc: don't document this
       # parses the response of virustotal's JSON reply to generate an array of PDNSResult
       def parse_json(page,query,response_time=0)
         res = []
+        return res if !page
         data = JSON.parse(page)
         if data['resolutions']
           data['resolutions'].each do |row|
