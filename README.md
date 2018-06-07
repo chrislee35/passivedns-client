@@ -115,6 +115,7 @@ Or use the included tool...
 	  -r# specifies the levels of recursion to pull. **WARNING** This is quite taxing on the pDNS servers, so use judiciously (never more than 3 or so) or find yourself blocked!
 	  -w# specifies the amount of time to wait, in seconds, between queries (Default: 0)
 	  -l <count> limits the number of records returned per passive dns database queried.
+	  --config[file] specifies the config file to use, instead of the default.
 	  
 	Getting Help
 	  -v debugging information
