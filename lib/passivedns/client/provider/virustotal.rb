@@ -71,6 +71,10 @@ module PassiveDNS #:nodoc: don't document this
           request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
           t1 = Time.now
           response = http.request(request)
+          if response.code.to_i == 204
+            $stderr.puts "DEBUG: empty response from server" if @debug
+            return
+          end
           t2 = Time.now
           recs = parse_json(response.body, label, t2-t1)
           if limit
@@ -99,6 +103,9 @@ module PassiveDNS #:nodoc: don't document this
               res << PDNSResult.new(self.class.name,response_time,row['hostname'],query,'A',nil,nil,lastseen, 'yellow')
             end
           end
+        end
+        if data['response_code'] == 0
+          $stderr.puts "DEBUG: server returned error: #{data['verbose_msg']}" if @debug
         end
         res
       rescue Exception => e
