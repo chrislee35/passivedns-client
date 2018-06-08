@@ -47,6 +47,7 @@ module PassiveDNS #:nodoc: don't document this
       #
       def initialize(options={})
         @debug = options[:debug] || false
+        @timeout = options[:timeout] || 20
         @username = options["USERNAME"]
         @password = options["PASSWORD"]
         @auth_token = options["AUTH_TOKEN"]
@@ -58,7 +59,7 @@ module PassiveDNS #:nodoc: don't document this
       def lookup(label, limit=nil)
         $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
         recs = []
-        Timeout::timeout(240) {
+        Timeout::timeout(@timeout) {
           url = @url+"/"+label
           $stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
           begin

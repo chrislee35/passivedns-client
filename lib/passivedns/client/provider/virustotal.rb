@@ -41,6 +41,7 @@ module PassiveDNS #:nodoc: don't document this
       #
       def initialize(options={})
         @debug = options[:debug] || false
+        @timeout = options[:timeout] || 20
         @apikey = options["APIKEY"] || raise("#{self.class.name} requires an APIKEY.  See README.md")
         @url = options["URL"] || "https://www.virustotal.com/vtapi/v2/"
       end
@@ -49,7 +50,7 @@ module PassiveDNS #:nodoc: don't document this
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
       def lookup(label, limit=nil)
         $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
-        Timeout::timeout(240) {
+        Timeout::timeout(@timeout) {
           url = nil
           if label =~ /^[\d\.]+$/
             url = "#{@url}ip-address/report?ip=#{label}&apikey=#{@apikey}"

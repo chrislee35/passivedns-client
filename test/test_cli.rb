@@ -51,6 +51,9 @@ State and Recursion
   -w# specifies the amount of time to wait, in seconds, between queries (Default: 0)
   -l <count> limits the number of records returned per passive dns database queried.
 
+Specifying a Configuration File
+  --config <file> specifies a config file. default: #{ENV['HOME']}/.passivedns-client
+
 Getting Help
   -h hello there.  This option produces this helpful help information on how to access help.
   -v debugging information
@@ -68,7 +71,8 @@ Getting Help
       :debug => false,
       :sqlitedb => nil,
       :limit => nil,
-      :help => false
+      :help => false,
+      :configfile => "#{ENV['HOME']}/.passivedns-client"
     }
     
     options, items = PassiveDNS::CLI.parse_command_line([])
@@ -108,7 +112,8 @@ Getting Help
       :debug => false,
       :sqlitedb => nil,
       :limit => nil,
-      :help => false
+      :help => false,
+      :configfile => "#{ENV['HOME']}/.passivedns-client"
     }
     
     options_target[:sep] = ","
@@ -171,7 +176,8 @@ Getting Help
       :debug => false,
       :sqlitedb => nil,
       :limit => nil,
-      :help => true
+      :help => true,
+      :configfile => "#{ENV['HOME']}/.passivedns-client"
     }
 
     options, items = PassiveDNS::CLI.parse_command_line(["-dptv", "-h", "8.8.8.8"])
@@ -195,7 +201,8 @@ Getting Help
       :debug => false,
       :sqlitedb => "test.db",
       :limit => 10,
-      :help => false
+      :help => false,
+      :configfile => "#{ENV['HOME']}/.passivedns-client"
     }
 
     options, items = PassiveDNS::CLI.parse_command_line(["-dptv", "-f", "test.db", "-r", "5", "-w", "30", "-l", "10", "8.8.8.8"])
@@ -215,11 +222,11 @@ Getting Help
       :sqlitedb => nil,
       :limit => nil,
       :help => false,
-      :configfile => ".passivedns-client"
+      :configfile => "#{ENV['HOME']}/.passivedns-client"
     }
     
     
-    options, items = PassiveDNS::CLI.parse_command_line(["--config", ".passivedns-client"])
+    options, items = PassiveDNS::CLI.parse_command_line(["--config", "#{ENV['HOME']}/.passivedns-client"])
     assert_equal(options_target, options)
     assert_equal([], items)
     

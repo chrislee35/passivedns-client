@@ -41,6 +41,7 @@ module PassiveDNS #:nodoc: don't document this
       #
       def initialize(options={})
         @debug = options[:debug] || false
+        @timeout = options[:timeout] || 20
         @apikey = options["APIKEY"]
         @url = options["URL"] || "https://api.mnemonic.no/pdns/v3/"
         if @url == "https://passivedns.mnemonic.no/api1/?apikey="
@@ -52,7 +53,7 @@ module PassiveDNS #:nodoc: don't document this
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
       def lookup(label, limit=nil)
         $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
-        Timeout::timeout(240) {
+        Timeout::timeout(@timeout) {
           url = "#{@url}#{label}"
           $stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
           url = URI.parse url

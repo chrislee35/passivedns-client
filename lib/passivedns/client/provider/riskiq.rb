@@ -46,6 +46,7 @@ module PassiveDNS #:nodoc: don't document this
       #
       def initialize(options={})
         @debug = options[:debug] || false
+        @timeout = options[:timeout] || 20
         @token = options["API_TOKEN"] || raise("#{self.class.name} requires an API_TOKEN")
         @privkey = options["API_PRIVATE_KEY"] || raise("#{self.class.name} requires an API_PRIVATE_KEY")
         @version = options["API_VERSION"] || "v1"
@@ -57,7 +58,7 @@ module PassiveDNS #:nodoc: don't document this
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
       def lookup(label, limit=nil)
         $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
-        Timeout::timeout(240) {
+        Timeout::timeout(@timeout) {
           url = nil
           params = {"rrType" => "", "maxResults" => limit || 1000}
         

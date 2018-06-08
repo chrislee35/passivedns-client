@@ -36,6 +36,7 @@ module PassiveDNS #:nodoc: don't document this
       #
       def initialize(options={})
         @debug = options[:debug] || false
+        @timeout = options[:timeout] || 20
         @base = options["URL"] || "http://www.bfk.de/bfk_dnslogger.html?query="
         raise "Due to the EU GDPR policy, this service has been shut down until further notice."
       end
@@ -44,7 +45,7 @@ module PassiveDNS #:nodoc: don't document this
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
        def lookup(label, limit=nil)  
         $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
-        Timeout::timeout(240) {
+        Timeout::timeout(@timeout) {
           t1 = Time.now
           open(
             @base+label,

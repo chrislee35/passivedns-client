@@ -54,6 +54,7 @@ module PassiveDNS #:nodoc: don't document this
       #
       def initialize(options={})
         @debug = options[:debug] || false
+        @timeout = options[:timeout] || 20
         @username = options["USERNAME"] || raise("#{self.class.name} requires a USERNAME")
         @apikey = options["APIKEY"] || raise("#{self.class.name} requires an APIKEY")
         @url = options["URL"] || "https://api.passivetotal.org/v2/dns/passive"
@@ -63,7 +64,7 @@ module PassiveDNS #:nodoc: don't document this
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
       def lookup(label, limit=nil)
         $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
-        Timeout::timeout(240) {
+        Timeout::timeout(@timeout) {
           url = @url+"?query=#{label}"
           $stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
           url = URI.parse url

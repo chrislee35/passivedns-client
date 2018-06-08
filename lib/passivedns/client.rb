@@ -94,6 +94,12 @@ module PassiveDNS # :nodoc:
       end
     end
     
+    def timeout=(t)
+      @pdnsdbs.each do |pdnsdb|
+        pdnsdb.timeout = t
+      end
+    end
+    
     # perform the query lookup accross all configured PassiveDNS providers
     def query(item, limit=nil)
       threads = []

@@ -43,6 +43,7 @@ module PassiveDNS #:nodoc: don't document this
       #
       def initialize(options={})
         @debug = options[:debug] || false
+        @timeout = options[:timeout] || 20
         ["API", "API_ID", "API_KEY"].each do |opt|
           if not options[opt]
             raise "Field #{opt} is required.  See README.md"
@@ -60,28 +61,33 @@ module PassiveDNS #:nodoc: don't document this
         end
         limit ||= 10000
         path = "/api/#{table}/keyword/#{label}/count/#{limit}/"
-        url = @cp["API"]+path
-        url = URI.parse url
-        http = Net::HTTP.new(url.host, url.port)
-        http.use_ssl = (url.scheme == 'https')
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE # I hate doing this
-        http.verify_depth = 5
-        request = Net::HTTP::Get.new(url.path)
-        request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
-        request.add_field('Accept', 'application/json')
-        request.add_field("X-BashTokid", @cp["API_ID"])
-        token = Digest::MD5.hexdigest(path+@cp["API_KEY"])
-        $stderr.puts "DEBUG: cn360 url = #{url} token = #{token}" if @debug
-        request.add_field("X-BashToken", token)
-        t1 = Time.now
-        response = http.request(request)
-        t2 = Time.now
-        recs = parse_json(response.body, label, t2-t1)
-        if limit
-          recs[0,limit]
-        else
-          recs
-        end
+        Timeout::timeout(@timeout) {
+          url = @cp["API"]+path
+          url = URI.parse url
+          http = Net::HTTP.new(url.host, url.port)
+          http.use_ssl = (url.scheme == 'https')
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE # I hate doing this
+          http.verify_depth = 5
+          request = Net::HTTP::Get.new(url.path)
+          request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
+          request.add_field('Accept', 'application/json')
+          request.add_field("X-BashTokid", @cp["API_ID"])
+          token = Digest::MD5.hexdigest(path+@cp["API_KEY"])
+          $stderr.puts "DEBUG: cn360 url = #{url} token = #{token}" if @debug
+          request.add_field("X-BashToken", token)
+          t1 = Time.now
+          response = http.request(request)
+          t2 = Time.now
+          recs = parse_json(response.body, label, t2-t1)
+          if limit
+            recs[0,limit]
+          else
+            recs
+          end
+        }
+      rescue Timeout::Error => e
+        $stderr.puts "#{self.class.name} lookup timed out: #{label}"
+        recs
       end
       
       private

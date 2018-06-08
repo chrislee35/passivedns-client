@@ -75,7 +75,8 @@ module PassiveDNS # :nodoc:
         :debug => false,
         :sqlitedb => nil,
         :limit => nil,
-        :help => false
+        :help => false,
+        :configfile => "#{ENV['HOME']}/.passivedns-client"
       }
 
       opts.each do |opt, arg|
@@ -185,6 +186,9 @@ module PassiveDNS # :nodoc:
       help_text << "  -r# specifies the levels of recursion to pull. **WARNING** This is quite taxing on the pDNS servers, so use judiciously (never more than 3 or so) or find yourself blocked!\n"
       help_text << "  -w# specifies the amount of time to wait, in seconds, between queries (Default: 0)\n"
       help_text << "  -l <count> limits the number of records returned per passive dns database queried.\n"
+      help_text << "\n"
+      help_text << "Specifying a Configuration File\n"
+      help_text << "  --config <file> specifies a config file. default: #{ENV['HOME']}/.passivedns-client\n"
       help_text << "\n"
       help_text << "Getting Help\n"
       help_text << "  -h hello there.  This option produces this helpful help information on how to access help.\n"

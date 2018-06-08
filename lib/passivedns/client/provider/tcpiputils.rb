@@ -42,6 +42,7 @@ module PassiveDNS #:nodoc: don't document this
       #
       def initialize(options={})
         @debug = options[:debug] || false
+        @timeout = options[:timeout] || 20
         @apikey = options["APIKEY"] || raise("#{self.class.name} requires an APIKEY.  See README.md")
         @url = options["URL"] || "https://www.utlsapi.com/api.php?version=1.0&apikey="
       end
@@ -53,7 +54,7 @@ module PassiveDNS #:nodoc: don't document this
         type = (label.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) ? "domainneighbors" : "domainipdnshistory"
         url = "#{@url}#{@apikey}&type=#{type}&q=#{label}"
         recs = []
-        Timeout::timeout(240) {
+        Timeout::timeout(@timeout) {
           url = URI.parse url
           http = Net::HTTP.new(url.host, url.port)
           http.use_ssl = (url.scheme == 'https')
