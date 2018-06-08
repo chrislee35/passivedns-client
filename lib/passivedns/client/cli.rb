@@ -267,7 +267,8 @@ module PassiveDNS # :nodoc:
       state = create_state(options[:sqlitedb])
       state.debug = options[:debug]
 
-      pdnsclient = PassiveDNS::Client.new(options[:pdnsdbs], options[:configfile])
+      pdnsclient = options[:configfile] ? PassiveDNS::Client.new(options[:pdnsdbs], options[:configfile])
+        : PassiveDNS::Client.new(options[:pdnsdbs])
       pdnsclient.debug = options[:debug]
       
       if items.length > 0
