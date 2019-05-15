@@ -73,6 +73,10 @@ module PassiveDNS #:nodoc: don't document this
           request.add_field("Accept", "application/json")
           t1 = Time.now
           response = http.request(request)
+          if response.code.to_i == 404
+            $stderr.puts "DEBUG: empty response from server" if @debug
+            return
+          end          
           t2 = Time.now
           $stderr.puts response.body if @debug
           parse_json(response.body,t2-t1)
