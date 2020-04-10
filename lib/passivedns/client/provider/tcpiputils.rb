@@ -78,7 +78,7 @@ module PassiveDNS #:nodoc: don't document this
             recs
           end
         }
-      rescue Timeout::Error => e
+      rescue Timeout::Error
         $stderr.puts "#{self.class.name} lookup timed out: #{label}"
       end
     
@@ -111,7 +111,7 @@ module PassiveDNS #:nodoc: don't document this
           when "domains"
             data.each do |rec|
               lastseen = (rec["updatedate"]) ? Date.parse(rec["updatedate"]) : nil
-              recs << PDNSResult.new(self.class.name, delta, rec, question, "A", nil, nil, nil, nil, 'yellow')
+              recs << PDNSResult.new(self.class.name, delta, rec, question, "A", nil, nil, lastseen, nil, 'yellow')
             end
           end
           if add_records

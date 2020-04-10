@@ -256,6 +256,7 @@ module PassiveDNS # :nodoc:
       else
         state = PassiveDNS::PDNSToolState.new
       end
+      state
     end
     
     # main method, takes command-line arguments and performs the desired queries and outputs

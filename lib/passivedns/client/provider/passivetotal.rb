@@ -86,7 +86,7 @@ module PassiveDNS #:nodoc: don't document this
             recs
           end
         }
-      rescue Timeout::Error => e
+      rescue Timeout::Error
         $stderr.puts "#{self.class.name} lookup timed out: #{label}"
       end
     
@@ -94,8 +94,12 @@ module PassiveDNS #:nodoc: don't document this
     
       # parses the response of passivetotals's JSON reply to generate an array of PDNSResult
       def parse_json(page,query,response_time=0)
-         res = []
+        res = []
         data = JSON.parse(page)
+        pp data
+        if data['message']
+          raise "#{self.class.name} Error: #{data['message']}"
+        end
         query = data['queryValue']
         if data['results']
           data['results'].each do |row|

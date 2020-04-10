@@ -3,6 +3,7 @@ require 'net/https'
 require 'openssl'
 require 'json'
 require 'digest/md5'
+require 'pp'
 
 module PassiveDNS #:nodoc: don't document this
   # The Provider module contains all the Passive DNS provider client code
@@ -85,7 +86,7 @@ module PassiveDNS #:nodoc: don't document this
             recs
           end
         }
-      rescue Timeout::Error => e
+      rescue Timeout::Error
         $stderr.puts "#{self.class.name} lookup timed out: #{label}"
         recs
       end
@@ -96,20 +97,24 @@ module PassiveDNS #:nodoc: don't document this
       def parse_json(page,query,response_time=0)
         res = []
         data = JSON.parse(page)
+        if data.class == Hash and data['err']
+          raise "#{self.class.name} Error: #{data['err']}"
+        end
         data.each do |row|
-          time_first = (row["time_first"]) ? Time.at(row["time_first"].to_i) : nil
-          time_last = (row["time_last"]) ? Time.at(row["time_last"].to_i) : nil
+          time_first = (row["time_first"]) ? Time.at(row["time_first"]) : nil
+          time_last = (row["time_last"]) ? Time.at(row["time_last"]) : nil
           count = row["count"] || 0
           query = row["rrname"]
           answers = row["rdata"].gsub(/;$/,'').split(/;/)
           rrtype = row["rrtype"]
           answers.each do |answer|
-            res << PDNSResult.new(self.class.name, response_time, query, answer, rrtype, time_first, time_last, count, 'yellow')
+            res << PDNSResult.new(self.class.name, response_time, query, answer, rrtype, nil, time_first, time_last, count, TLPSecurityControl.new('yellow'))
           end
         end
         res
       rescue Exception => e
         $stderr.puts "#{self.class.name} Exception: #{e}"
+        puts e.backtrace
         raise e
       end
     end

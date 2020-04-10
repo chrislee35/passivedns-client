@@ -43,7 +43,7 @@ module PassiveDNS #:nodoc: don't document this
     
       # Takes a label (either a domain or an IP address) and returns
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
-       def lookup(label, limit=nil)  
+      def lookup(label, limit=nil)  
         $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
         Timeout::timeout(@timeout) {
           t1 = Time.now
@@ -60,7 +60,7 @@ module PassiveDNS #:nodoc: don't document this
             end
           end
         }
-      rescue Timeout::Error => e
+      rescue Timeout::Error
         $stderr.puts "#{self.class.name} lookup timed out: #{label}"      
       end
     

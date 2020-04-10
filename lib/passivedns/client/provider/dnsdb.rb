@@ -77,7 +77,7 @@ module PassiveDNS #:nodoc: don't document this
           $stderr.puts response.body if @debug
           parse_json(response.body,t2-t1)
         }
-      rescue Timeout::Error => e
+      rescue Timeout::Error
         $stderr.puts "#{self.class.name} lookup timed out: #{label}"
       end
       
