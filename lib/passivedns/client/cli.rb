@@ -133,12 +133,7 @@ module PassiveDNS # :nodoc:
       ARGV.replace(origARGV)
 
       if options[:pdnsdbs].length == 0
-        options[:pdnsdbs] << "bfk"
-      end
-
-      if options[:pdnsdbs].index("bfk") and options[:recursedepth] > 1 and options[:wait] < 60
-        options[:wait] = 60
-        $stderr.puts "Enforcing a minimal 60 second wait when using BFK for recursive crawling"
+        options[:pdnsdbs] << "virustotal"
       end
 
       if options[:debug]
@@ -168,7 +163,7 @@ module PassiveDNS # :nodoc:
       letter_map.keys.sort.each do |l|
         help_text << "  -d#{l} use #{letter_map[l][0]}\n"
       end
-      help_text << "  -dvt uses VirusTotal and TCPIPUtils (for example)\n"
+      help_text << "  -dvr uses VirusTotal and RiskIQ (for example)\n"
       help_text << "\n"
       help_text << "Output Formatting\n"
       help_text << "  -g link-nodal GDF visualization definition\n"

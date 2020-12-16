@@ -46,31 +46,6 @@ class TestPassiveDnsQuery < Minitest::Test
     end
   end
   
-  def test_BFK
-    assert_raises RuntimeError do
-      PassiveDNS::Client.new(['bfk'])
-    end
-    
-    assert_raises RuntimeError do
-      PassiveDNS::Provider::BFK.new(@cp['bfk'] || {})
-    end
-    
-    # refute_nil(d)
-    # rows = d.lookup("example.org",3)
-    # refute_nil(rows)
-    # refute_nil(rows.to_s)
-    # refute_nil(rows.to_xml)
-    # refute_nil(rows.to_json)
-    # refute_nil(rows.to_yaml)
-    # assert_equal(3, rows.length)
-    # rows = d.lookup("8.8.8.8")
-    # refute_nil(rows)
-    # refute_nil(rows.to_s)
-    # refute_nil(rows.to_xml)
-    # refute_nil(rows.to_json)
-    # refute_nil(rows.to_yaml)
-  end
-  
   def test_DNSDB
     PassiveDNS::Client.new(['dnsdb'])
     d = PassiveDNS::Provider::DNSDB.new(@cp['dnsdb'] || {})
@@ -95,81 +70,6 @@ class TestPassiveDnsQuery < Minitest::Test
     d = PassiveDNS::Provider::VirusTotal.new(@cp['virustotal'] || {})
     refute_nil(d)
     rows = d.lookup("google.com",3)
-    refute_nil(rows)
-    refute_nil(rows.to_s)
-    refute_nil(rows.to_xml)
-    refute_nil(rows.to_json)
-    refute_nil(rows.to_yaml)
-    assert_equal(3, rows.length)
-    rows = d.lookup("8.8.8.8")
-    refute_nil(rows)
-    refute_nil(rows.to_s)
-    refute_nil(rows.to_xml)
-    refute_nil(rows.to_json)
-    refute_nil(rows.to_yaml)
-  end
-  
-  def test_TCPIPUtils
-    PassiveDNS::Client.new(['tcpiputils'])
-    d = PassiveDNS::Provider::TCPIPUtils.new(@cp['tcpiputils'] || {})
-    refute_nil(d)
-    rows = d.lookup("example.org")
-    refute_nil(rows)
-    refute_nil(rows.to_s)
-    refute_nil(rows.to_xml)
-    refute_nil(rows.to_json)
-    refute_nil(rows.to_yaml)
-    rows = d.lookup("example.org",3)
-    refute_nil(rows)
-    refute_nil(rows.to_s)
-    refute_nil(rows.to_xml)
-    refute_nil(rows.to_json)
-    refute_nil(rows.to_yaml)
-    assert_equal(3, rows.length)
-    rows = d.lookup("8.8.8.8")
-    refute_nil(rows)
-    refute_nil(rows.to_s)
-    refute_nil(rows.to_xml)
-    refute_nil(rows.to_json)
-    refute_nil(rows.to_yaml)
-  end
-
-  def test_cn360
-    PassiveDNS::Client.new(['cn360'])
-    d = PassiveDNS::Provider::CN360.new(@cp['cn360'] || {})
-    refute_nil(d)
-    rows = d.lookup("example.org")
-    refute_nil(rows)
-    refute_nil(rows.to_s)
-    refute_nil(rows.to_xml)
-    refute_nil(rows.to_json)
-    refute_nil(rows.to_yaml)
-    rows = d.lookup("example.org",3)
-    refute_nil(rows)
-    refute_nil(rows.to_s)
-    refute_nil(rows.to_xml)
-    refute_nil(rows.to_json)
-    refute_nil(rows.to_yaml)
-    assert_equal(3, rows.length)
-    rows = d.lookup("8.8.8.8")
-    refute_nil(rows)
-    refute_nil(rows.to_s)
-    refute_nil(rows.to_xml)
-    refute_nil(rows.to_json)
-    refute_nil(rows.to_yaml)
-  end
-  
-  def test_nmemonic
-    PassiveDNS::Client.new(['mnemonic'])
-    d = PassiveDNS::Provider::Mnemonic.new(@cp['mnemonic'] || {})
-    refute_nil(d)
-    rows = d.lookup("example.org")
-    refute_nil(rows)
-    refute_nil(rows.to_s)
-    refute_nil(rows.to_xml)
-    refute_nil(rows.to_json)
-    refute_nil(rows.to_yaml)
-    rows = d.lookup("example.org",3)
     refute_nil(rows)
     refute_nil(rows.to_s)
     refute_nil(rows.to_xml)
