@@ -2,14 +2,10 @@
 
 This rubygem queries the following Passive DNS databases: 
 
-* BFK.de
 * CIRCL
 * DNSDB (FarSight)
-* Mnemonic
-* PassiveDNS.cn (Qihoo 360 Technology Co.,Ltd)
 * PassiveTotal
 * RiskIQ
-* TCPIPUtils
 * VirusTotal
 
 Passive DNS is a technique where IP to hostname mappings are made by recording the answers of other people's queries.  
@@ -40,16 +36,8 @@ From version 2.0.0 on, all configuration keys for passive DNS providers are in o
 
 	[dnsdb]
 	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-	[cn360]
-	API = http://some.web.address.for.their.api
-	API_ID = a username that is given when you register
-	API_KEY = a long and random password of sorts that is used along with the page request to generate a per page API key
-	[tcpiputils]
-	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 	[virustotal]
 	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-	[mnemonic]
-	APIKEY = 01234567890abcdef01234567890abcdef012345
 	[passivetotal]
 	USERNAME = tom@example.com
 	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
@@ -66,61 +54,55 @@ CIRCL also can use and authorization token.  In that case, you should drop the U
 	AUTH_TOKEN = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 ## Getting Access
-* 360.cn : http://www.passivedns.cn
-* BFK.de : No registration required, but please, please ready their usage policy at http://www.bfk.de/bfk_dnslogger.html
 * CIRCL : https://www.circl.lu/services/passive-dns/
 * DNSDB (Farsight Security) : https://api.dnsdb.info/
-* Mnemonic : mss .at. mnemonic.no
 * PassiveTotal : https://www.passivetotal.org
 * RiskIQ : https://github.com/RiskIQ/python_api/blob/master/LICENSE
-* TCPIPUtils : http://www.tcpiputils.com/premium-access
 * VirusTotal : https://www.virustotal.com
 
 ## Usage
 
 	require 'passivedns/client'
 	
-	c = PassiveDNS::Client.new(['bfk','dnsdb']) # providers: bfk, tcpiputils, certee, dnsdb, virustotal, passivedns.cn, mnemonic
+	c = PassiveDNS::Client.new(['riskiq','dnsdb'])
 	results = c.query("example.com")
 	
 
 Or use the included tool...
 
-	Usage: bin/pdnstool [-d [3bcdmptv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] <ip|domain|cidr>
-	Passive DNS Providers  -d3bcdmptv uses all of the available passive dns database
-	  -d3 use 360.cn
-	  -db use BFK.de
-	  -dc use CIRCL
-	  -dd use DNSDB
-	  -dm use Mnemonic
-	  -dp use PassiveTotal
-	  -dr use RiskIQ
-	  -dt use TCPIPUtils
-	  -dv use VirusTotal
-	  -dvt uses VirusTotal and TCPIPUtils (for example)
-	  
-	Output Formatting
-	  -g link-nodal GDF visualization definition
-	  -z link-nodal graphviz visualization definition
-	  -m link-nodal graphml visualization definition
-	  -c CSV
-	  -x XML
-	  -y YAML
-	  -j JSON
-	  -t ASCII text (default)
-	  -s <sep> specifies a field separator for text output, default is tab
-	  
-	State and Recusion
-	  -f[file] specifies a sqlite3 database used to read the current state - useful for large result sets and generating graphs of previous runs.
-	  -r# specifies the levels of recursion to pull. **WARNING** This is quite taxing on the pDNS servers, so use judiciously (never more than 3 or so) or find yourself blocked!
-	  -w# specifies the amount of time to wait, in seconds, between queries (Default: 0)
-	  -l <count> limits the number of records returned per passive dns database queried.
-    
-	Specifying a Configuration File
-	  --config <file> specifies a config file. default: #{ENV['HOME']}/.passivedns-client
-	  
-	Getting Help
-	  -v debugging information
+    Usage: bin/pdnstool [-d [cdprv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] [--config <file>] <ip|domain|cidr>
+    Passive DNS Providers
+      -dcdprv uses all of the available passive dns database
+      -dc use CIRCL
+      -dd use DNSDB
+      -dp use PassiveTotal
+      -dr use RiskIQ
+      -dv use VirusTotal
+      -dvr uses VirusTotal and RiskIQ (for example)
+
+    Output Formatting
+      -g link-nodal GDF visualization definition
+      -z link-nodal graphviz visualization definition
+      -m link-nodal graphml visualization definition
+      -c CSV
+      -x XML
+      -y YAML
+      -j JSON
+      -t ASCII text (default)
+      -s <sep> specifies a field separator for text output, default is tab
+
+    State and Recursion
+      -f[file] specifies a sqlite3 database used to read the current state - useful for large result sets and generating graphs of previous runs.
+      -r# specifies the levels of recursion to pull. **WARNING** This is quite taxing on the pDNS servers, so use judiciously (never more than 3 or so) or find yourself blocked!
+      -w# specifies the amount of time to wait, in seconds, between queries (Default: 0)
+      -l <count> limits the number of records returned per passive dns database queried.
+
+    Specifying a Configuration File
+      --config <file> specifies a config file. default: /home/chris/.passivedns-client
+
+    Getting Help
+      -h hello there.  This option produces this helpful help information on how to access help.
+      -v debugging information
 
 ## Writing Your Own Database Adaptor
 

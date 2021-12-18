@@ -98,7 +98,7 @@ module PassiveDNS #:nodoc: don't document this
             recs
           end
         }
-      rescue Timeout::Error => e
+      rescue Timeout::Error
         $stderr.puts "#{self.class.name} lookup timed out: #{label}"
         recs
       end

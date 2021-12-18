@@ -205,11 +205,12 @@ module PassiveDNS # :nodoc:
     # creates an SQLite3-based Passive DNS Client state
     # only argument is the filename of the sqlite3 database
     def initialize(sqlitedb=nil)
+      @debug = false
       puts "PDNSToolState  initialize  #{sqlitedb}" if @debug
       @level = 0
       @sqlitedb = sqlitedb
       raise "Cannot use this class without a database file" unless @sqlitedb
-      unless File.exists?(@sqlitedb)
+      unless File.exist?(@sqlitedb)
         newdb = true
       end
       @sqlitedbh = SQLite3::Database.new(@sqlitedb)
