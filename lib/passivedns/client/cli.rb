@@ -206,7 +206,7 @@ module PassiveDNS # :nodoc:
           rv = pdnsclient.query(q,limit)
           if rv
             rv.each do |r|
-              if ["A","AAAA","NS","CNAME","PTR"].index(r.rrtype)
+              if ["A","AAAA","NS","CNAME","PTR", "SOA"].index(r.rrtype)
                 puts "pdnslookup: #{r.to_s}" if debug
                 state.add_result(r)
               end

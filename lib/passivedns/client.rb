@@ -112,7 +112,7 @@ module PassiveDNS # :nodoc:
         rv = thr.join.value
         if rv
           rv.each do |r|
-            if ["A","AAAA","NS","CNAME","PTR"].index(r.rrtype)
+            if ["A","AAAA","NS","CNAME","PTR","SOA"].index(r.rrtype)
               results << r
             end
           end
