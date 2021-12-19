@@ -1,9 +1,10 @@
 # PassiveDNS::Client
 
-This rubygem queries the following Passive DNS databases: 
+This rubygem queries the following Passive DNS databases:
 
 * CIRCL
 * DNSDB (FarSight)
+* OpenSource Context (OSC)
 * PassiveTotal
 * RiskIQ
 * VirusTotal
@@ -47,6 +48,8 @@ From version 2.0.0 on, all configuration keys for passive DNS providers are in o
 	[riskiq]
 	API_TOKEN = 0123456789abcdef
 	API_PRIVATE_KEY = 01234567890abcdefghijklmnopqrstu
+  [osc]
+  APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 CIRCL also can use and authorization token.  In that case, you should drop the USERNAME and PASSWORD options and change the section to something like the following:
 
@@ -56,6 +59,7 @@ CIRCL also can use and authorization token.  In that case, you should drop the U
 ## Getting Access
 * CIRCL : https://www.circl.lu/services/passive-dns/
 * DNSDB (Farsight Security) : https://api.dnsdb.info/
+* OSC: https://oscontext.com/
 * PassiveTotal : https://www.passivetotal.org
 * RiskIQ : https://github.com/RiskIQ/python_api/blob/master/LICENSE
 * VirusTotal : https://www.virustotal.com
@@ -63,10 +67,10 @@ CIRCL also can use and authorization token.  In that case, you should drop the U
 ## Usage
 
 	require 'passivedns/client'
-	
+
 	c = PassiveDNS::Client.new(['riskiq','dnsdb'])
 	results = c.query("example.com")
-	
+
 
 Or use the included tool...
 
@@ -106,9 +110,12 @@ Or use the included tool...
 
 ## Writing Your Own Database Adaptor
 
-	module PassiveDNS
-		class MyDatabaseAdaptor < PassiveDB
-			# override
+  module PassiveDNS #:nodoc: don't document this
+    # The Provider module contains all the Passive DNS provider client code
+    module Provider
+      # Queries OSContext's passive DNS database
+      class MyDatabaseAdaptor < PassiveDB
+        # Sets the modules self-reported name to "OSC"
 		    def self.name
 		      "MyPerfectDNS" # short, proper label
 		    end
@@ -120,33 +127,35 @@ Or use the included tool...
 		    def self.option_letter
 		      "p" # single letter to specify the option for the command line tool
 		    end
-    
+
 		    attr_accessor :debug
-			def initialize(options={})
-			  @debug = options[:debug] || false
-			  # please include a way to change the base URL, HOST, etc., so that people can test
-			  # against a test/alternate version of your service
-		      @base = options["URL"] || "http://myperfectdns.example.com/pdns.cgi?query="
-			  @apikey = options["APIKEY"] || raise("APIKEY option required for #{self.class}")
-			end
-			
-			# override
-			def lookup(label, limit=nil)
-				$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
-				recs = []
-				Timeout::timeout(240) {
-					t1 = Time.now
-					# TODO: your code goes here to fetch the data from your service
-					# TODO: don't forget to impose the limit either during the fetch or during the parse phase
-					response_time = Time.now - t1
-					# TODO: parse your data and add PDNSResult objects to recs array
-					recs << PDNSResult.new(self.class.name, response_time, rrname ,
-						rdata, rrtype, ttl, first_seen, last_seen, count )
-				}
-				recs
-			rescue Timeout::Error => e # using the implied "begin/try" from the beginning of the function
-				$stderr.puts "#{self.class.name} lookup timed out: #{label}"
-			end
+
+  			def initialize(options={})
+  			  @debug = options[:debug] || false
+  			  # please include a way to change the base URL, HOST, etc., so that people can test
+  			  # against a test/alternate version of your service
+  		      @base = options["URL"] || "http://myperfectdns.example.com/pdns.cgi?query="
+  			  @apikey = options["APIKEY"] || raise("APIKEY option required for #{self.class}")
+  			end
+
+  			# override
+  			def lookup(label, limit=nil)
+  				$stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
+  				recs = []
+  				Timeout::timeout(240) {
+  					t1 = Time.now
+  					# TODO: your code goes here to fetch the data from your service
+  					# TODO: don't forget to impose the limit either during the fetch or during the parse phase
+  					response_time = Time.now - t1
+  					# TODO: parse your data and add PDNSResult objects to recs array
+  					recs << PDNSResult.new(self.class.name, response_time, rrname ,
+  						rdata, rrtype, ttl, first_seen, last_seen, count )
+  				}
+  				recs
+  			rescue Timeout::Error => e # using the implied "begin/try" from the beginning of the function
+  				$stderr.puts "#{self.class.name} lookup timed out: #{label}"
+  			end
+      end
 		end
 	end
 

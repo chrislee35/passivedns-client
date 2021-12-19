@@ -10,7 +10,7 @@ require_relative 'helper'
 require 'configparser'
 
 class TestPassiveDnsQuery < Minitest::Test
-  
+
   def setup
     configfile="#{ENV['HOME']}/.passivedns-client"
     @cp = ConfigParser.new(configfile)
@@ -21,7 +21,7 @@ class TestPassiveDnsQuery < Minitest::Test
       end
     end
   end
-    
+
   def test_instantiate_Nonexisting_Client
     assert_raises RuntimeError do
       PassiveDNS::Client.new(['doesnotexist'])
@@ -31,11 +31,11 @@ class TestPassiveDnsQuery < Minitest::Test
   def test_instantiate_All_Clients
     PassiveDNS::Client.new()
   end
-  
+
   def test_instantiate_Passive_DNS_State
     refute_nil(PassiveDNS::PDNSToolState.new)
   end
-  
+
   def test_instantiate_Passive_DNS_State_database
     if File.exist?("test/test.sqlite3")
       File.unlink("test/test.sqlite3")
@@ -45,7 +45,7 @@ class TestPassiveDnsQuery < Minitest::Test
       File.unlink("test/test.sqlite3")
     end
   end
-  
+
   def test_DNSDB
     PassiveDNS::Client.new(['dnsdb'])
     d = PassiveDNS::Provider::DNSDB.new(@cp['dnsdb'] || {})
@@ -83,7 +83,7 @@ class TestPassiveDnsQuery < Minitest::Test
     refute_nil(rows.to_json)
     refute_nil(rows.to_yaml)
   end
-  
+
   def test_passivetotal
     PassiveDNS::Client.new(['passivetotal'])
     d = PassiveDNS::Provider::PassiveTotal.new(@cp['passivetotal'] || {})
@@ -109,7 +109,7 @@ class TestPassiveDnsQuery < Minitest::Test
     refute_nil(rows.to_json)
     refute_nil(rows.to_yaml)
   end
-    
+
   def test_circl
     PassiveDNS::Client.new(['circl'])
     d = PassiveDNS::Provider::CIRCL.new(@cp['circl'] || {})
@@ -134,7 +134,7 @@ class TestPassiveDnsQuery < Minitest::Test
     refute_nil(rows.to_json)
     refute_nil(rows.to_yaml)
   end
-  
+
   def test_riskiq
     PassiveDNS::Client.new(['riskiq'])
     d = PassiveDNS::Provider::RiskIQ.new(@cp['riskiq'] || {})
@@ -158,5 +158,14 @@ class TestPassiveDnsQuery < Minitest::Test
     refute_nil(rows.to_xml)
     refute_nil(rows.to_json)
     refute_nil(rows.to_yaml)
+  end
+
+  def test_osc
+    PassiveDNS.Client.new(['osc'])
+    d = PassiveDNS::Provider::OSC.new(@cp['osc'] || {})
+    refute_nil(d)
+    rows = d.lookup("example.org")
+    refute_nil(rows)
+    puts rows
   end
 end

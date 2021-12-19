@@ -1,4 +1,4 @@
-# DESCRIPTION: this is a module for Open Source Context's PassiveDNS archive.  
+# DESCRIPTION: this is a module for Open Source Context's PassiveDNS archive.
 require 'net/http'
 require 'net/https'
 
@@ -19,7 +19,7 @@ module PassiveDNS #:nodoc: don't document this
       def self.option_letter
         "o"
       end
-    
+
       # :debug enables verbose logging to standard output
       attr_accessor :debug
       # === Options
@@ -73,7 +73,7 @@ module PassiveDNS #:nodoc: don't document this
           if response.code.to_i == 404
             $stderr.puts "DEBUG: empty response from server" if @debug
             return
-          end          
+          end
           t2 = Time.now
           #$stderr.puts response.body if @debug
           parse_json(response.body,t2-t1)
@@ -81,9 +81,9 @@ module PassiveDNS #:nodoc: don't document this
       rescue Timeout::Error
         $stderr.puts "#{self.class.name} lookup timed out: #{label}"
       end
-      
+
       private
-    
+
       # parses the response of OSC's JSON reply to generate an array of PDNSResult
       def parse_json(page,response_time)
         res = []
@@ -107,7 +107,7 @@ module PassiveDNS #:nodoc: don't document this
                 'A',
                 nil,
                 firstseen,
-                lastseen, 
+                lastseen,
                 'amber')
             elsif row['type'] == "soa_email"
               firstseen = Time.parse(row['date'])
@@ -126,7 +126,7 @@ module PassiveDNS #:nodoc: don't document this
                 'SOA',
                 nil,
                 firstseen,
-                lastseen, 
+                lastseen,
                 'amber')
 
 
@@ -140,6 +140,6 @@ module PassiveDNS #:nodoc: don't document this
 #        $stderr.puts page
         raise e
       end
-    end    
+    end
   end
 end

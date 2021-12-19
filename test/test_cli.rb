@@ -13,18 +13,19 @@ require_relative '../lib/passivedns/client/cli.rb'
 class TestCLI < Minitest::Test
   def test_letter_map
     letter_map = PassiveDNS::CLI.get_letter_map
-    assert_equal("cdprv", letter_map.keys.sort.join(""))
+    assert_equal("cdoprv", letter_map.keys.sort.join(""))
   end
-  
+
   def test_help_text
     helptext = PassiveDNS::CLI.run(["--help"])
     helptext.gsub!(/Usage: .*?\[/, "Usage: [")
     assert_equal(
-"Usage: [-d [cdprv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] [--config <file>] <ip|domain|cidr>
+"Usage: [-d [cdoprv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] [--config <file>] <ip|domain|cidr>
 Passive DNS Providers
-  -dcdprv uses all of the available passive dns database
+  -dcdoprv uses all of the available passive dns database
   -dc use CIRCL
   -dd use DNSDB
+  -do use OSC
   -dp use PassiveTotal
   -dr use RiskIQ
   -dv use VirusTotal
@@ -55,7 +56,7 @@ Getting Help
   -v debugging information
 ", helptext)
   end
-  
+
   def test_provider_parsing
     options_target = {
       :pdnsdbs => ["virustotal"],
@@ -70,23 +71,23 @@ Getting Help
       :help => false,
       :configfile => "#{ENV['HOME']}/.passivedns-client"
     }
-    
+
     options, items = PassiveDNS::CLI.parse_command_line([])
     assert_equal(options_target, options)
     assert_equal([], items)
-       
+
     options_target[:pdnsdbs] = ["circl", "dnsdb", "riskiq"]
     options, items = PassiveDNS::CLI.parse_command_line(["-dcdr"])
     assert_equal(options_target, options)
     assert_equal([], items)
-    
+
     options_target[:pdnsdbs] = ["passivetotal", "virustotal"]
     options, items = PassiveDNS::CLI.parse_command_line(["-dpv"])
     assert_equal(options_target, options)
     assert_equal([], items)
-    
+
   end
-  
+
   def test_output_parsing
     options_target = {
       :pdnsdbs => ["passivetotal", "virustotal"],
@@ -101,19 +102,19 @@ Getting Help
       :help => false,
       :configfile => "#{ENV['HOME']}/.passivedns-client"
     }
-    
+
     options_target[:sep] = ","
     options, items = PassiveDNS::CLI.parse_command_line(["-dpv", "-c", "8.8.8.8"])
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
-    
+
     options_target[:sep] = "|"
     options, items = PassiveDNS::CLI.parse_command_line(["-dpv", "-s", "|", "8.8.8.8"])
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
-    
+
     options_target[:sep] = "\t"
-    
+
     options, items = PassiveDNS::CLI.parse_command_line(["-dpv", "-t", "8.8.8.8"])
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
@@ -122,35 +123,35 @@ Getting Help
     options, items = PassiveDNS::CLI.parse_command_line(["-dpv", "-j", "8.8.8.8"])
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
-    
+
     options_target[:format] = "xml"
     options, items = PassiveDNS::CLI.parse_command_line(["-dpv", "-x", "8.8.8.8"])
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
-    
+
     options_target[:format] = "yaml"
     options, items = PassiveDNS::CLI.parse_command_line(["-dpv", "-y", "8.8.8.8"])
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
-    
+
     options_target[:format] = "gdf"
     options, items = PassiveDNS::CLI.parse_command_line(["-dpv", "-g", "8.8.8.8"])
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
-    
+
     options_target[:format] = "graphviz"
     options, items = PassiveDNS::CLI.parse_command_line(["-dpv", "-z", "8.8.8.8"])
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
-    
+
     options_target[:format] = "graphml"
     options, items = PassiveDNS::CLI.parse_command_line(["-dpv", "-m", "8.8.8.8"])
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
-    
+
     options_target[:format] = "text"
   end
-  
+
   def test_help_debug_parsing
     options_target = {
       :pdnsdbs => ["passivetotal", "virustotal"],
@@ -169,13 +170,13 @@ Getting Help
     options, items = PassiveDNS::CLI.parse_command_line(["-dpv", "-h", "8.8.8.8"])
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
-    
+
     options_target[:debug] = true
     options, items = PassiveDNS::CLI.parse_command_line(["-dpv", "-h", "-v", "8.8.8.8"])
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
   end
-  
+
   def test_state_recursion_parsing
     options_target = {
       :pdnsdbs => ["passivetotal", "virustotal"],
@@ -195,7 +196,7 @@ Getting Help
     assert_equal(options_target, options)
     assert_equal(["8.8.8.8"], items)
   end
-  
+
   def test_configuration_file
     options_target = {
       :pdnsdbs => ["virustotal"],
@@ -210,10 +211,10 @@ Getting Help
       :help => false,
       :configfile => "#{ENV['HOME']}/.passivedns-client"
     }
-    
+
     options, items = PassiveDNS::CLI.parse_command_line(["--config", "#{ENV['HOME']}/.passivedns-client"])
     assert_equal(options_target, options)
     assert_equal([], items)
-    
+
   end
 end
