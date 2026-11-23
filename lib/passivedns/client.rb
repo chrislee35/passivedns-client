@@ -109,16 +109,19 @@ module PassiveDNS # :nodoc:
     def query(item, limit = nil)
       threads = @pdnsdbs.map do |pdnsdb|
         Thread.new item do |q|
+          Thread.current.report_on_exception = false
           pdnsdb.lookup q, limit
         end
       end
 
       results = []
       threads.each do |thr|
-        rv = thr.join.value
-        rv&.each do |r|
+        thr.value&.each do |r|
           results << r if RRTYPES.include? r.rrtype
         end
+      rescue StandardError => e
+        # one failing provider should not lose the answers from the others
+        warn "ERROR: #{e.message}"
       end
 
       results

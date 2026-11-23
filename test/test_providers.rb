@@ -97,11 +97,8 @@ class TestProviders < Minitest::Test
   def test_virustotal_error
     serve({ 'error' => { 'code' => 'WrongCredentialsError', 'message' => 'Wrong API key' } }.to_json, status: 401)
     provider = PassiveDNS::Provider::VirusTotal.new 'APIKEY' => 'secret', 'URL' => @server.url
-    _out, err = capture_io do
-      error = assert_raises(RuntimeError) { provider.lookup 'example.org' }
-      assert_match(/Wrong API key/, error.message)
-    end
-    assert_match(/VirusTotal Exception/, err)
+    error = assert_raises(PassiveDNS::ProviderError) { provider.lookup 'example.org' }
+    assert_match(/HTTP 401.*Wrong API key/, error.message)
   end
 
   def test_passivetotal
@@ -114,6 +111,38 @@ class TestProviders < Minitest::Test
     assert_equal 'PassiveTotal/a,b', rows[0].source
     assert_equal '93.184.216.34', rows[0].answer
     assert_equal 'yellow', rows[0].security
+  end
+
+  def test_error_responses_raise_provider_errors
+    serve 'Error: Bad API key', status: 403
+    url = @server.url
+    providers = {
+      'DNSDB' => PassiveDNS::Provider::DNSDB.new('APIKEY' => 'k', 'URL' => url),
+      'CIRCL' => PassiveDNS::Provider::CIRCL.new('USERNAME' => 'u', 'PASSWORD' => 'p', 'URL' => url),
+      'OSC' => PassiveDNS::Provider::OSC.new('APIKEY' => 'k', 'URL' => url),
+      'VirusTotal' => PassiveDNS::Provider::VirusTotal.new('APIKEY' => 'k', 'URL' => url),
+      'PassiveTotal' => PassiveDNS::Provider::PassiveTotal.new('USERNAME' => 'u', 'APIKEY' => 'k', 'URL' => url)
+    }
+    providers.each do |name, provider|
+      error = assert_raises(PassiveDNS::ProviderError, name) { provider.lookup 'example.org' }
+      assert_equal "#{name}: HTTP 403: Error: Bad API key", error.message
+    end
+  end
+
+  def test_one_failing_provider_does_not_lose_other_results
+    good = FakeServer.new %({"rrname":"example.org.","rrtype":"A","rdata":"93.184.216.34","time_first":1,"time_last":2,"count":1}\n)
+    serve 'Error: Bad API key', status: 403
+    Dir.mktmpdir do |dir|
+      file = File.join dir, 'config'
+      File.write file, "[dnsdb]\nAPIKEY = k\nURL = #{@server.url}\n[circl]\nAUTH_TOKEN = t\nURL = #{good.url}/query\n"
+      client = PassiveDNS::Client.new %w[dnsdb circl], file
+      results = nil
+      _out, err = capture_io { results = client.query 'example.org' }
+      assert_equal ['93.184.216.34'], results.map(&:answer)
+      assert_includes err, 'ERROR: DNSDB: HTTP 403: Error: Bad API key'
+    end
+  ensure
+    good&.close
   end
 
   def test_providers_use_default_tls_verification

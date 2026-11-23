@@ -91,6 +91,7 @@ module PassiveDNS # :nodoc: don't document this
             if body == 'Rate Limit Exceeded'
               warn "DEBUG: Rate Limit Exceeded. Retrying #{label}" if @debug
             else
+              check_response response
               t2 = Time.now
               recs = parse_json response.body, label, t2 - t1
               break

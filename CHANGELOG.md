@@ -25,6 +25,9 @@
   It now uses bound parameters.
 - Results read back from the SQLite state database had their columns shifted (the query was reported as the source).
 - A failed query was marked as failed using the wrong value, so it was never actually marked.
+- A non-2xx response from a provider (a bad API key, a rate limit) crashed the query with a JSON parse error and a backtrace. It now
+  raises `PassiveDNS::ProviderError` (`DNSDB: HTTP 403: Error: Bad API key`), and `Client#query` prints it and still returns the answers from
+  the other providers.
 - `Client#timeout=` raised `NoMethodError`, because providers had no `timeout=`.
 - DNSDB lost the name of a record that had no trailing dot (`gsub!` returned `nil`).
 - OSC, VirusTotal and PassiveTotal put the `security` marking in the `count` field of a result.

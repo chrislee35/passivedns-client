@@ -84,6 +84,7 @@ module PassiveDNS # :nodoc: don't document this
             warn 'DEBUG: empty response from server' if @debug
             return
           end
+          check_response response
           t2 = Time.now
           warn response.body if @debug
           parse_json response.body, t2 - t1
