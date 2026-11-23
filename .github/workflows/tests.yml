@@ -1,0 +1,31 @@
+name: Tests
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: ruby-${{ matrix.ruby }}
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.ruby == 'head' }}
+
+    strategy:
+      matrix:
+        ruby: ['3.2', '3.3', '3.4', 'head']
+      fail-fast: false
+
+    steps:
+      - name: Checkout git
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Run tests
+        run: bundle exec rake test
+
+      - name: Build gem file
+        run: gem build passivedns-client.gemspec

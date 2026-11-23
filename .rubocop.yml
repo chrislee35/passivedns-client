@@ -1,0 +1,98 @@
+plugins:
+  - rubocop-performance
+
+AllCops:
+  TargetRubyVersion: 3.2
+  NewCops: enable
+  Include:
+    - 'Gemfile'
+    - '/*.gemspec'
+    - '/**/*.rb'
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/ParameterLists:
+  Enabled: true
+  CountKeywordArgs: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 140
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Max: 25
+
+Style/ExpandPathArguments:
+  Enabled: true
+  Exclude:
+    - passivedns-client.gemspec
+    - test/**/*
+
+Lint/AmbiguousOperatorPrecedence:
+  Enabled: false
+
+Performance/ChainArrayAllocation:
+  Enabled: true
+
+Style/AutoResourceCleanup:
+  Enabled: true
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  Exclude:
+    - '/**/*.rsb'
+
+Style/Documentation:
+  Enabled: false
+
+Style/OptionHash:
+  Enabled: true
+  SuspiciousParamNames:
+    - options
+    - api_options
+    - opts
+    - args
+    - params
+    - parameters
+    - settings
+
+Style/ReturnNil:
+  Enabled: true
+
+Style/UnlessLogicalOperators:
+  Enabled: true
+
+Naming/FileName:
+  Enabled: false
+
+Style/MethodCallWithArgsParentheses:
+  Enabled: true
+  AllowParenthesesInMultilineCall: true
+  AllowParenthesesInChaining: true
+  EnforcedStyle: omit_parentheses
+
+Style/HashTransformKeys:
+  Enabled: false
+
+Style/HashTransformValues:
+  Enabled: false
+
+Naming/VariableNumber:
+  Enabled: true
+  Exclude:
+    - 'test/**/*'
