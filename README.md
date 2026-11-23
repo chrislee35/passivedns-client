@@ -17,6 +17,10 @@ Please note that use of any passive DNS database is subject to the terms of use 
 
 If you like this library, please buy the Passive DNS operators a round of beers.
 
+## Requirements
+
+Ruby 3.2 or newer.
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -33,7 +37,7 @@ Or install it yourself as:
 
 ## Configuration
 
-From version 2.0.0 on, all configuration keys for passive DNS providers are in one configuration file.  By default the location of the file is $HOME/.passivedns-client .  The syntax of this file is as follows:
+From version 2.0.0 on, all configuration keys for passive DNS providers are in one configuration file.  By default the location of the file is $HOME/.passivedns-client .  The file is a standard INI file (it is read with the [iniparse](https://rubygems.org/gems/iniparse) gem).  The syntax is as follows:
 
 	[dnsdb]
 	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
@@ -48,8 +52,8 @@ From version 2.0.0 on, all configuration keys for passive DNS providers are in o
 	[riskiq]
 	API_TOKEN = 0123456789abcdef
 	API_PRIVATE_KEY = 01234567890abcdefghijklmnopqrstu
-  [osc]
-  APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+	[osc]
+	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 CIRCL also can use and authorization token.  In that case, you should drop the USERNAME and PASSWORD options and change the section to something like the following:
 
