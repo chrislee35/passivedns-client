@@ -6,7 +6,7 @@ require_relative '../lib/passivedns/client/cli'
 class TestCLI < Minitest::Test
   def test_letter_map
     letter_map = PassiveDNS::CLI.letter_map
-    assert_equal 'cdoprv', letter_map.keys.sort.join
+    assert_equal 'cdopv', letter_map.keys.sort.join
   end
 
   # rubocop:disable-next Layout/LineLength
@@ -14,16 +14,15 @@ class TestCLI < Minitest::Test
     helptext = PassiveDNS::CLI.run ['--help']
     helptext.gsub!(/Usage: .*?\[/, 'Usage: [')
     assert_equal(
-      "Usage: [-d [cdoprv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] [--config <file>] <ip|domain|cidr>
+      "Usage: [-d [cdopv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] [--config <file>] <ip|domain|cidr>
 Passive DNS Providers
-  -dcdoprv uses all of the available passive dns database
+  -dcdopv uses all of the available passive dns database
   -dc use CIRCL
   -dd use DNSDB
   -do use OSC
   -dp use PassiveTotal
-  -dr use RiskIQ
   -dv use VirusTotal
-  -dvr uses VirusTotal and RiskIQ (for example)
+  -dvp uses VirusTotal and PassiveTotal (for example)
 
 Output Formatting
   -g link-nodal GDF visualization definition
@@ -71,8 +70,8 @@ Getting Help
     assert_equal options_target, options
     assert_equal [], items
 
-    options_target[:pdnsdbs] = %w[circl dnsdb riskiq]
-    options, items = PassiveDNS::CLI.parse_command_line ['-dcdr']
+    options_target[:pdnsdbs] = %w[circl dnsdb passivetotal]
+    options, items = PassiveDNS::CLI.parse_command_line ['-dcdp']
     assert_equal options_target, options
     assert_equal [], items
 

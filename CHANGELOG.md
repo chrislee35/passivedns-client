@@ -5,6 +5,11 @@
 ### Breaking changes
 
 - Requires Ruby 3.2 or newer.
+- The RiskIQ provider (`riskiq`, `-dr`) was removed. Its default endpoint, `ws.riskiq.net`, no longer answers, and RiskIQ is now part of
+  Microsoft Defender Threat Intelligence. PassiveTotal's `v2` mode was already the same service. Remove any `[riskiq]` section from your config.
+- The VirusTotal provider now uses VirusTotal's v3 API (`/api/v3/{domains,ip_addresses}/<item>/resolutions`) instead of v2, and returns at
+  most 40 resolutions per query. A `URL` setting that points at the v2 API must be removed or updated. The provider is untested against the
+  live service.
 - The configuration file is now read with [iniparse](https://rubygems.org/gems/iniparse) instead of `configparser`. The file format and
   location (`~/.passivedns-client`) are unchanged. A file that cannot be parsed now raises an error that names the file.
 - TLS certificates are now verified. Every provider used to disable verification (`OpenSSL::SSL::VERIFY_NONE`).
@@ -21,7 +26,7 @@
 - Results read back from the SQLite state database had their columns shifted (the query was reported as the source).
 - A failed query was marked as failed using the wrong value, so it was never actually marked.
 - `Client#timeout=` raised `NoMethodError`, because providers had no `timeout=`.
-- DNSDB and RiskIQ lost the name of a record that had no trailing dot (`gsub!` returned `nil`).
+- DNSDB lost the name of a record that had no trailing dot (`gsub!` returned `nil`).
 - OSC, VirusTotal and PassiveTotal put the `security` marking in the `count` field of a result.
 - OSC asked for gzip responses and then did not decompress them.
 - The PassiveTotal provider no longer prints every response to standard output.

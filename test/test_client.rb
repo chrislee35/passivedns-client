@@ -14,9 +14,6 @@ class TestClient < Minitest::Test
     [circl]
     USERNAME = circl_user
     PASSWORD = circl_pass
-    [riskiq]
-    API_TOKEN = token
-    API_PRIVATE_KEY = privkey
     [osc]
     APIKEY = osckey
   INI
@@ -30,7 +27,7 @@ class TestClient < Minitest::Test
   end
 
   def test_provider_names
-    assert_equal %w[circl dnsdb osc passivetotal riskiq virustotal], PassiveDNS::Client.provider_names
+    assert_equal %w[circl dnsdb osc passivetotal virustotal], PassiveDNS::Client.provider_names
   end
 
   def test_load_config
@@ -38,8 +35,8 @@ class TestClient < Minitest::Test
       config = PassiveDNS::Client.load_config file
       assert_equal 'dnsdbkey', config['dnsdb']['APIKEY']
       assert_equal 'tom@example.com', config['passivetotal']['USERNAME']
-      assert_equal 'privkey', config['riskiq']['API_PRIVATE_KEY']
-      assert_equal %w[circl dnsdb osc passivetotal riskiq virustotal], config.keys.sort
+      assert_equal 'tom@example.com', config['passivetotal']['USERNAME']
+      assert_equal %w[circl dnsdb osc passivetotal virustotal], config.keys.sort
     end
   end
 

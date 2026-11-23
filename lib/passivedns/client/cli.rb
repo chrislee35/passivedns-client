@@ -146,7 +146,7 @@ module PassiveDNS # :nodoc:
       letter_map.keys.sort.each do |l|
         help_text << "  -d#{l} use #{letter_map[l][0]}\n"
       end
-      help_text << "  -dvr uses VirusTotal and RiskIQ (for example)\n"
+      help_text << "  -dvp uses VirusTotal and PassiveTotal (for example)\n"
       help_text << "\n"
       help_text << "Output Formatting\n"
       help_text << "  -g link-nodal GDF visualization definition\n"

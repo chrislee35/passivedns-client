@@ -6,7 +6,6 @@ This rubygem queries the following Passive DNS databases:
 * DNSDB (FarSight)
 * OpenSource Context (OSC)
 * PassiveTotal
-* RiskIQ
 * VirusTotal
 
 Passive DNS is a technique where IP to hostname mappings are made by recording the answers of other people's queries.  
@@ -49,9 +48,6 @@ From version 2.0.0 on, all configuration keys for passive DNS providers are in o
 	[circl]
 	USERNAME = circl_user
 	PASSWORD = circl_pass
-	[riskiq]
-	API_TOKEN = 0123456789abcdef
-	API_PRIVATE_KEY = 01234567890abcdefghijklmnopqrstu
 	[osc]
 	APIKEY = 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
@@ -65,28 +61,26 @@ CIRCL also can use and authorization token.  In that case, you should drop the U
 * DNSDB (Farsight Security) : https://api.dnsdb.info/
 * OSC: https://oscontext.com/
 * PassiveTotal : https://www.passivetotal.org
-* RiskIQ : https://github.com/RiskIQ/python_api/blob/master/LICENSE
 * VirusTotal : https://www.virustotal.com
 
 ## Usage
 
 	require 'passivedns/client'
 
-	c = PassiveDNS::Client.new(['riskiq','dnsdb'])
+	c = PassiveDNS::Client.new(['virustotal','dnsdb'])
 	results = c.query("example.com")
 
 
 Or use the included tool...
 
-    Usage: bin/pdnstool [-d [cdprv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] [--config <file>] <ip|domain|cidr>
+    Usage: bin/pdnstool [-d [cdopv]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] [--config <file>] <ip|domain|cidr>
     Passive DNS Providers
-      -dcdprv uses all of the available passive dns database
+      -dcdopv uses all of the available passive dns database
       -dc use CIRCL
       -dd use DNSDB
       -dp use PassiveTotal
-      -dr use RiskIQ
       -dv use VirusTotal
-      -dvr uses VirusTotal and RiskIQ (for example)
+      -dvp uses VirusTotal and PassiveTotal (for example)
 
     Output Formatting
       -g link-nodal GDF visualization definition
