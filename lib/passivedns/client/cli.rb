@@ -1,28 +1,20 @@
+# frozen_string_literal: true
+
 require 'getoptlong'
 require 'structformatter'
-require 'getoptlong'
 require 'yaml'
-require 'pp'
 
 module PassiveDNS # :nodoc:
   # Handles all the command-line parsing, state tracking, and dispatching queries to the PassiveDNS::Client instance
   # CLInterface is aliased by CLI
   class CLInterface
     #  generates a mapping between the option letter for each PassiveDNS provider and the class
-    def self.get_letter_map
-      letter_map = {}
-      mod = PassiveDNS::Provider
-      mod.constants.each do |const|
-        if mod.const_get(const).is_a?(Class) and mod.const_get(const).superclass == PassiveDNS::PassiveDB
-          letter = mod.const_get(const).option_letter
-          name = mod.const_get(const).name
-          config_section_name = mod.const_get(const).config_section_name
-          letter_map[letter] = [name, config_section_name]
-        end
+    def self.letter_map
+      PassiveDB.providers.to_h do |provider|
+        [provider.option_letter, [provider.name, provider.config_section_name]]
       end
-      letter_map      
     end
-    
+
     # parses the command line and yields an options hash
     # === Default Options
     #      options = {
@@ -38,62 +30,56 @@ module PassiveDNS # :nodoc:
     #        :help => false      # display the usage text
     #      }
     def self.parse_command_line(args)
-      origARGV = ARGV.dup
-      ARGV.replace(args)
+      orig_argv = ARGV.dup
+      ARGV.replace args
       opts = GetoptLong.new(
-        [ '--help', '-h', GetoptLong::NO_ARGUMENT ],
-        [ '--debug', '-v', GetoptLong::NO_ARGUMENT ],
-        [ '--database', '-d', GetoptLong::REQUIRED_ARGUMENT ],
-  
-        [ '--gdf', '-g', GetoptLong::NO_ARGUMENT ],
-        [ '--graphviz', '-z', GetoptLong::NO_ARGUMENT ],
-        [ '--graphml', '-m', GetoptLong::NO_ARGUMENT ],
-        [ '--csv', '-c', GetoptLong::NO_ARGUMENT ],
-        [ '--xml', '-x', GetoptLong::NO_ARGUMENT ],
-        [ '--yaml', '-y', GetoptLong::NO_ARGUMENT ],
-        [ '--json', '-j', GetoptLong::NO_ARGUMENT ],
-        [ '--text', '-t', GetoptLong::NO_ARGUMENT ],
-        [ '--sep', '-s', GetoptLong::REQUIRED_ARGUMENT ],
-  
-        [ '--sqlite3', '-f', GetoptLong::REQUIRED_ARGUMENT ],
-        [ '--recurse', '-r', GetoptLong::REQUIRED_ARGUMENT ],
-        [ '--wait', '-w', GetoptLong::REQUIRED_ARGUMENT ],
-        [ '--limit', '-l', GetoptLong::REQUIRED_ARGUMENT ],
-        [ '--config', GetoptLong::REQUIRED_ARGUMENT ]
+        ['--help', '-h', GetoptLong::NO_ARGUMENT],
+        ['--debug', '-v', GetoptLong::NO_ARGUMENT],
+        ['--database', '-d', GetoptLong::REQUIRED_ARGUMENT],
+        ['--gdf', '-g', GetoptLong::NO_ARGUMENT],
+        ['--graphviz', '-z', GetoptLong::NO_ARGUMENT],
+        ['--graphml', '-m', GetoptLong::NO_ARGUMENT],
+        ['--csv', '-c', GetoptLong::NO_ARGUMENT],
+        ['--xml', '-x', GetoptLong::NO_ARGUMENT],
+        ['--yaml', '-y', GetoptLong::NO_ARGUMENT],
+        ['--json', '-j', GetoptLong::NO_ARGUMENT],
+        ['--text', '-t', GetoptLong::NO_ARGUMENT],
+        ['--sep', '-s', GetoptLong::REQUIRED_ARGUMENT],
+        ['--sqlite3', '-f', GetoptLong::REQUIRED_ARGUMENT],
+        ['--recurse', '-r', GetoptLong::REQUIRED_ARGUMENT],
+        ['--wait', '-w', GetoptLong::REQUIRED_ARGUMENT],
+        ['--limit', '-l', GetoptLong::REQUIRED_ARGUMENT],
+        ['--config', GetoptLong::REQUIRED_ARGUMENT]
       )
-
-      letter_map = get_letter_map
 
       # sets the default search methods
       options = {
-        :pdnsdbs => [],
-        :format => "text",
-        :sep => "\t",
-        :recursedepth => 1,
-        :wait => 0,
-        :res => nil,
-        :debug => false,
-        :sqlitedb => nil,
-        :limit => nil,
-        :help => false,
-        :configfile => "#{ENV['HOME']}/.passivedns-client"
+        pdnsdbs: [],
+        format: 'text',
+        sep: "\t",
+        recursedepth: 1,
+        wait: 0,
+        res: nil,
+        debug: false,
+        sqlitedb: nil,
+        limit: nil,
+        help: false,
+        configfile: "#{Dir.home}/.passivedns-client"
       }
 
       opts.each do |opt, arg|
         case opt
-        when '--help'
-          options[:help] = true
         when '--debug'
           options[:debug] = true
         when '--database'
-          arg.split(//).each do |c|
+          arg.chars.each do |c|
             if c == ','
               next
             elsif letter_map[c]
               options[:pdnsdbs] << letter_map[c][1]
             else
-              $stderr.puts "ERROR: Unknown passive DNS database identifier: #{c}."
-              usage(letter_map)
+              warn "ERROR: Unknown passive DNS database identifier: #{c}."
+              usage letter_map
             end
           end
         when '--gdf'
@@ -125,39 +111,36 @@ module PassiveDNS # :nodoc:
           options[:limit] = arg.to_i
         when '--config'
           options[:configfile] = arg
-        else
+        else # --help and anything unrecognized
           options[:help] = true
         end
       end
       args = ARGV.dup
-      ARGV.replace(origARGV)
+      ARGV.replace orig_argv
 
-      if options[:pdnsdbs].length == 0
-        options[:pdnsdbs] << "virustotal"
-      end
+      options[:pdnsdbs] << 'virustotal' if options[:pdnsdbs].empty?
 
       if options[:debug]
-        $stderr.puts "Using the following databases: #{options[:pdnsdbs].join(", ")}"
-        $stderr.puts "Recursions: #{options[:recursedepth]}, Wait time: #{options[:wait]}, Limit: #{options[:limit] or 'none'}"
-        if options[:format] == "text" or options[:format] == "csv"
-            $stderr.puts "Output format: #{options[:format]} (sep=\"#{options[:sep]}\")"
+        warn "Using the following databases: #{options[:pdnsdbs].join ', '}"
+        warn "Recursions: #{options[:recursedepth]}, Wait time: #{options[:wait]}, Limit: #{options[:limit] or 'none'}"
+        if (options[:format] == 'text') || (options[:format] == 'csv')
+          warn "Output format: #{options[:format]} (sep=\"#{options[:sep]}\")"
         else
-            $stderr.puts "Output format: #{options[:format]}"
+          warn "Output format: #{options[:format]}"
         end
-        if ENV['http_proxy']
-          $stderr.puts "Using proxy settings: http_proxy=#{ENV['http_proxy']}, https_proxy=#{ENV['https_proxy']}"
-        end
+        warn "Using proxy settings: http_proxy=#{ENV['http_proxy']}, https_proxy=#{ENV.fetch 'https_proxy', nil}" if ENV['http_proxy']
       end
-      
+
       [options, args]
     end
-    
+
     # returns a string containing the usage information
     # takes in a hash of letter to passive dns providers
+    # rubocop:disable-next Layout/LineLength
     def self.usage(letter_map)
-      databases = letter_map.keys.sort.join("")
-      help_text = ""
-      help_text << "Usage: #{$0} [-d [#{databases}]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] [--config <file>] <ip|domain|cidr>\n"
+      databases = letter_map.keys.sort.join
+      help_text = +''
+      help_text << "Usage: #{$PROGRAM_NAME} [-d [#{databases}]] [-g|-v|-m|-c|-x|-y|-j|-t] [-os <sep>] [-f <file>] [-r#|-w#|-v] [-l <count>] [--config <file>] <ip|domain|cidr>\n"
       help_text << "Passive DNS Providers\n"
       help_text << "  -d#{databases} uses all of the available passive dns database\n"
       letter_map.keys.sort.each do |l|
@@ -183,15 +166,15 @@ module PassiveDNS # :nodoc:
       help_text << "  -l <count> limits the number of records returned per passive dns database queried.\n"
       help_text << "\n"
       help_text << "Specifying a Configuration File\n"
-      help_text << "  --config <file> specifies a config file. default: #{ENV['HOME']}/.passivedns-client\n"
+      help_text << "  --config <file> specifies a config file. default: #{Dir.home}/.passivedns-client\n"
       help_text << "\n"
       help_text << "Getting Help\n"
       help_text << "  -h hello there.  This option produces this helpful help information on how to access help.\n"
       help_text << "  -v debugging information\n"
-      
+
       help_text
     end
-    
+
     # performs a stateful, recursive (if desired) passive DNS lookup against all specified providers
     def self.pdnslookup(state, pdnsclient, options)
       recursedepth = options[:recursedepth]
@@ -202,17 +185,17 @@ module PassiveDNS # :nodoc:
       level = 0
       while level < recursedepth
         puts "pdnslookup: #{level} < #{recursedepth}" if debug
-        state.each_query(recursedepth) do |q|
-          rv = pdnsclient.query(q,limit)
+        state.each_query recursedepth do |q|
+          rv = pdnsclient.query q, limit
           if rv
             rv.each do |r|
-              if ["A","AAAA","NS","CNAME","PTR", "SOA"].index(r.rrtype)
-                puts "pdnslookup: #{r.to_s}" if debug
-                state.add_result(r)
+              if PassiveDNS::Client::RRTYPES.include? r.rrtype
+                puts "pdnslookup: #{r}" if debug
+                state.add_result r
               end
             end
           else
-            state.update_query(rv,'failed')
+            state.update_query q, 'failed'
           end
           sleep wait if level < recursedepth
         end
@@ -220,14 +203,14 @@ module PassiveDNS # :nodoc:
       end
       state
     end
-    
+
     # returns a string transforming all the PassiveDNS::PDNSResult stored in the state object into text/xml/json/etc.
-    def self.results_to_s(state,options)
+    def self.results_to_s(state, options)
       format = options[:format]
       sep = options[:sep]
       case format
       when 'text'
-        PassiveDNS::PDNSResult.members.join(sep)+"\n"+state.to_s(sep)
+        "#{PassiveDNS::PDNSResult.members.join sep}\n#{state.to_s sep}"
       when 'yaml'
         state.to_yaml
       when 'xml'
@@ -242,48 +225,45 @@ module PassiveDNS # :nodoc:
         state.to_graphml
       end
     end
-    
+
     # create a state instance
-    def self.create_state(sqlitedb=nil)
-      state = nil
+    def self.create_state(sqlitedb = nil)
       if sqlitedb
-        state = PassiveDNS::PDNSToolStateDB.new(sqlitedb)
+        PassiveDNS::PDNSToolStateDB.new sqlitedb
       else
-        state = PassiveDNS::PDNSToolState.new
+        PassiveDNS::PDNSToolState.new
       end
-      state
     end
-    
+
     # main method, takes command-line arguments and performs the desired queries and outputs
     def self.run(args)
-      options, items = parse_command_line(args)
-      if options[:help]
-        return usage(get_letter_map)
-      end
+      options, items = parse_command_line args
+      return usage letter_map if options[:help]
+
       if options[:recursedepth] > 3
-        $stderr.puts "WARNING:  a recursedepth of > 3 can be abusive, please reconsider: sleeping 60 seconds for sense to come to you (hint: hit CTRL-C)"
+        warn 'WARNING:  a recursedepth of > 3 can be abusive, please reconsider: ' \
+             'sleeping 60 seconds for sense to come to you (hint: hit CTRL-C)'
         sleep 60
       end
-      state = create_state(options[:sqlitedb])
+      state = create_state options[:sqlitedb]
       state.debug = options[:debug]
 
-      pdnsclient = PassiveDNS::Client.new(options[:pdnsdbs], options[:configfile])
+      pdnsclient = PassiveDNS::Client.new options[:pdnsdbs], options[:configfile]
       pdnsclient.debug = options[:debug]
-      
-      if items.length > 0
+
+      if items.length.positive?
         items.each do |arg|
-          state.add_query(arg,'pending',0)
+          state.add_query arg, 'pending', 0
         end
       else
         $stdin.each_line do |l|
-          state.add_query(l.chomp,'pending',0)
+          state.add_query l.chomp, 'pending', 0
         end
       end
-      pdnslookup(state,pdnsclient,options)
-      results_to_s(state,options)
+      pdnslookup state, pdnsclient, options
+      results_to_s state, options
     end
   end
   # Alias for the CLInterface class
   CLI = PassiveDNS::CLInterface
 end
-

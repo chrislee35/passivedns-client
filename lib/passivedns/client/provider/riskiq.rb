@@ -1,30 +1,37 @@
+# frozen_string_literal: true
+
 # DESCRIPTION: Module to query PassiveTotal's passive DNS repository
 
+require 'json'
 require 'net/http'
-require 'net/https'
 require 'openssl'
-require 'pp'
+require 'time'
+require 'timeout'
+require 'uri'
 
-module PassiveDNS #:nodoc: don't document this
+module PassiveDNS # :nodoc: don't document this
   # The Provider module contains all the Passive DNS provider client code
   module Provider
     # Queries RiskIQ's passive DNS database
     class RiskIQ < PassiveDB
       # Sets the modules self-reported name to "RiskIQ"
       def self.name
-        "RiskIQ"
+        'RiskIQ'
       end
+
       # Sets the configuration section name to "riskiq"
       def self.config_section_name
-        "riskiq"
+        'riskiq'
       end
+
       # Sets the command line database argument to "r"
       def self.option_letter
-        "r"
+        'r'
       end
-    
+
       # :debug enables verbose logging to standard output
       attr_accessor :debug
+
       # === Options
       # * :debug            Sets the debug flag for the module
       # * "API_TOKEN"       REQUIRED: User name associated with your RiskIQ account
@@ -44,103 +51,94 @@ module PassiveDNS #:nodoc: don't document this
       #
       #   PassiveDNS::Provider::RiskIQ.new(options)
       #
-      def initialize(options={})
-        @debug = options[:debug] || false
-        @timeout = options[:timeout] || 20
-        @token = options["API_TOKEN"] || raise("#{self.class.name} requires an API_TOKEN")
-        @privkey = options["API_PRIVATE_KEY"] || raise("#{self.class.name} requires an API_PRIVATE_KEY")
-        @version = options["API_VERSION"] || "v1"
-        @server = options["API_SERVER"] || api_settings[@version][:server]
+      def initialize(config = {})
+        super()
+        @debug = config[:debug] || false
+        @timeout = config[:timeout] || 20
+        @token = config['API_TOKEN'] || raise("#{self.class.name} requires an API_TOKEN")
+        @privkey = config['API_PRIVATE_KEY'] || raise("#{self.class.name} requires an API_PRIVATE_KEY")
+        @version = config['API_VERSION'] || 'v1'
+        @server = config['API_SERVER'] || api_settings[@version][:server]
         @url = "https://#{@server}/#{@version}"
       end
 
       # Takes a label (either a domain or an IP address) and returns
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
-      def lookup(label, limit=nil)
-        $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
-        Timeout::timeout(@timeout) {
+      def lookup(label, limit = nil)
+        warn "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
+        Timeout.timeout @timeout do
           url = nil
-          params = {"rrType" => "", "maxResults" => limit || 1000}
-        
-          if label =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/
-            url = @url+"/dns/data"
-            params["ip"] = label 
+          params = { 'rrType' => '', 'maxResults' => limit || 1000 }
+
+          if /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.match?(label)
+            url = "#{@url}/dns/data"
+            params['ip'] = label
           else
             resource = api_settings[@version][:resource]
             param = api_settings[@version][:param]
-            url = @url+"/dns/#{resource}"
+            url = @url + "/dns/#{resource}"
             params[param] = label
           end
-          url << "?"
-          params.each do |k,v|
-            url << "#{k}=#{v}&"
-          end
-          url.gsub!(/\&$/,"")
-        
-          $stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
+          url = "#{url}?#{URI.encode_www_form params}"
+
+          warn "DEBUG: #{self.class.name} url = #{url}" if @debug
           url = URI.parse url
-          http = Net::HTTP.new(url.host, url.port)
+          http = Net::HTTP.new url.host, url.port
           http.use_ssl = (url.scheme == 'https')
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
           http.verify_depth = 5
-          request = Net::HTTP::Get.new(url.request_uri)
-          request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
-          request.add_field('Accept', 'Application/JSON')
-          request.add_field('Content-Type', 'Application/JSON')
-          request.basic_auth(@token, @privkey)
+          request = Net::HTTP::Get.new url.request_uri
+          request.add_field 'User-Agent', "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}"
+          request.add_field 'Accept', 'Application/JSON'
+          request.add_field 'Content-Type', 'Application/JSON'
+          request.basic_auth @token, @privkey
           t1 = Time.now
-          response = http.request(request)
+          response = http.request request
           t2 = Time.now
-          recs = parse_json(response.body, label, t2-t1)
+          recs = parse_json response.body, label, t2 - t1
           if limit
-            recs[0,limit]
+            recs[0, limit]
           else
             recs
           end
-        }
+        end
       rescue Timeout::Error
-        $stderr.puts "#{self.class.name} lookup timed out: #{label}"
+        warn "#{self.class.name} lookup timed out: #{label}"
       end
-    
+
       private
-    
+
       def api_settings
         @api_settings ||= {
-          'v1' => { server: "ws.riskiq.net", resource: 'name', param: 'name' },
-          'v2' => { server: "api.passivetotal.org", resource: 'passive', param: 'query' }
+          'v1' => { server: 'ws.riskiq.net', resource: 'name', param: 'name' },
+          'v2' => { server: 'api.passivetotal.org', resource: 'passive', param: 'query' }
         }
       end
 
       # parses the response of riskiq's JSON reply to generate an array of PDNSResult
-      def parse_json(page,query,response_time=0)
+      def parse_json(page, _query, response_time = 0)
         res = []
-        data = JSON.parse(page)
-        if data['message']
-          if data['message'] =~ /quota_exceeded/
-            $stderr.puts "ERROR: quota exceeded."
-            return res
-          end
+        data = JSON.parse page
+        if data['message']&.include? 'quota_exceeded'
+          warn 'ERROR: quota exceeded.'
+          return res
         end
-        if data['records']
-          data['records'].each do |record|
-            name = record['name'].gsub!(/\.$/,'')
-            type = record['rrtype']
-            last_seen = Time.parse(record['lastSeen'])
-            first_seen = Time.parse(record['firstSeen'])
-            count = record['count']
-            record['data'].each do |datum|
-              datum.gsub!(/\.$/,'')
-              res << PDNSResult.new(self.class.name,response_time,
-                name, datum, type, 0, first_seen, last_seen, count, 'yellow')
-            end
+        data['records']&.each do |record|
+          name = record['name'].delete_suffix '.'
+          type = record['rrtype']
+          last_seen = Time.parse record['lastSeen']
+          first_seen = Time.parse record['firstSeen']
+          count = record['count']
+          record['data'].each do |datum|
+            datum = datum.delete_suffix '.'
+            res << PDNSResult.new(self.class.name, response_time,
+                                  name, datum, type, 0, first_seen, last_seen, count, 'yellow')
           end
         end
         res
-      rescue Exception => e
-        $stderr.puts "#{self.class.name} Exception: #{e}"
+      rescue StandardError => e
+        warn "#{self.class.name} Exception: #{e}"
         raise e
       end
-
     end
   end
 end

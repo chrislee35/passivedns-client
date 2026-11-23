@@ -1,10 +1,15 @@
+# frozen_string_literal: true
+
 # DESCRIPTION: Module to query PassiveTotal's passive DNS repository
 
+require 'json'
 require 'net/http'
-require 'net/https'
 require 'openssl'
+require 'time'
+require 'timeout'
+require 'uri'
 
-module PassiveDNS #:nodoc: don't document this
+module PassiveDNS # :nodoc: don't document this
   # The Provider module contains all the Passive DNS provider client code
   module Provider
     # Queries CIRCL.LU's passive DNS database
@@ -12,26 +17,29 @@ module PassiveDNS #:nodoc: don't document this
     class Circl < PassiveDB
       # Sets the modules self-reported name to "CIRCL"
       def self.name
-        "CIRCL"
+        'CIRCL'
       end
+
       # Sets the configuration section name to "circl"
       def self.config_section_name
-        "circl"
+        'circl'
       end
+
       # Sets the command line database argument to "c"
       def self.option_letter
-        "c"
+        'c'
       end
-    
+
       # :debug enables verbose logging to standard output
       attr_accessor :debug
+
       # === Options
       # * :debug       Sets the debug flag for the module
       # * "USERNAME"   User name associated with your CIRCL account
       # * "PASSWORD"   Password associated with your CIRCL account
       # * "AUTH_TOKEN" Authorization token associated with your CIRCL account
       # * "URL"      Alternate url for testing.  Defaults to "https://www.circl.lu/pdns/query"
-      
+
       # You should either have a username+password or an authorization token to use this service
       #
       # === Example Instantiation
@@ -45,83 +53,78 @@ module PassiveDNS #:nodoc: don't document this
       #
       #   PassiveDNS::Provider::CIRCL.new(options)
       #
-      def initialize(options={})
-        @debug = options[:debug] || false
-        @timeout = options[:timeout] || 20
-        @username = options["USERNAME"]
-        @password = options["PASSWORD"]
-        @auth_token = options["AUTH_TOKEN"]
-        @url = options["URL"] || "https://www.circl.lu/pdns/query"
+      def initialize(config = {})
+        super()
+        @debug = config[:debug] || false
+        @timeout = config[:timeout] || 20
+        @username = config['USERNAME']
+        @password = config['PASSWORD']
+        @auth_token = config['AUTH_TOKEN']
+        @url = config['URL'] || 'https://www.circl.lu/pdns/query'
       end
 
       # Takes a label (either a domain or an IP address) and returns
       # an array of PassiveDNS::PDNSResult instances with the answers to the query
-      def lookup(label, limit=nil)
-        $stderr.puts "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
+      def lookup(label, limit = nil)
+        warn "DEBUG: #{self.class.name}.lookup(#{label})" if @debug
         recs = []
-        Timeout::timeout(@timeout) {
-          url = @url+"/"+label
-          $stderr.puts "DEBUG: #{self.class.name} url = #{url}" if @debug
+        Timeout.timeout @timeout do
+          url = "#{@url}/#{label}"
+          warn "DEBUG: #{self.class.name} url = #{url}" if @debug
           begin
             url = URI.parse url
           rescue URI::InvalidURIError
-            $stderr.puts "ERROR: Invalid address: #{url}"
+            warn "ERROR: Invalid address: #{url}"
             return recs
           end
-          http = Net::HTTP.new(url.host, url.port)
+          http = Net::HTTP.new url.host, url.port
           http.use_ssl = (url.scheme == 'https')
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
           http.verify_depth = 5
-          request = Net::HTTP::Get.new(url.request_uri)
-          request.add_field("User-Agent", "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}")
-          if @username
-            request.basic_auth(@username, @password)
-          end
-          if @auth_token
-            request.add_field("Authorization", @auth_token)
-          end
+          request = Net::HTTP::Get.new url.request_uri
+          request.add_field 'User-Agent', "Ruby/#{RUBY_VERSION} passivedns-client rubygem v#{PassiveDNS::Client::VERSION}"
+          request.basic_auth @username, @password if @username
+          request.add_field 'Authorization', @auth_token if @auth_token
           t1 = Time.now
-          0.upto(9) do
-            response = http.request(request)
+          0.upto 9 do
+            response = http.request request
             body = response.body
-            if body == "Rate Limit Exceeded"
-              $stderr.puts "DEBUG: Rate Limit Exceeded. Retrying #{label}" if @debug
+            if body == 'Rate Limit Exceeded'
+              warn "DEBUG: Rate Limit Exceeded. Retrying #{label}" if @debug
             else
               t2 = Time.now
-              recs  = parse_json(response.body, label, t2-t1)
+              recs = parse_json response.body, label, t2 - t1
               break
             end
           end
           if limit
-            recs[0,limit]
+            recs[0, limit]
           else
             recs
           end
-        }
+        end
       rescue Timeout::Error
-        $stderr.puts "#{self.class.name} lookup timed out: #{label}"
+        warn "#{self.class.name} lookup timed out: #{label}"
         recs
       end
 
       private
 
       # parses the response of circl's JSON reply to generate an array of PDNSResult
-      def parse_json(page,query,response_time=0)
-         res = []
-        page.split(/\n/).each do |line|
-          row = JSON.parse(line)
-          firstseen = Time.at(row['time_first'].to_i)
-          lastseen = Time.at(row['time_last'].to_i)
-          res << PDNSResult.new(self.class.name,response_time,
-            row['rrname'], row['rdata'], row['rrtype'], 0, 
-            firstseen, lastseen, row['count'], 'yellow')
+      def parse_json(page, _query, response_time = 0)
+        res = []
+        page.split("\n").each do |line|
+          row = JSON.parse line
+          firstseen = Time.at row['time_first'].to_i
+          lastseen = Time.at row['time_last'].to_i
+          res << PDNSResult.new(self.class.name, response_time,
+                                row['rrname'], row['rdata'], row['rrtype'], 0,
+                                firstseen, lastseen, row['count'], 'yellow')
         end
         res
-      rescue Exception => e
-        $stderr.puts "#{self.class.name} Exception: #{e}"
+      rescue StandardError => e
+        warn "#{self.class.name} Exception: #{e}"
         raise e
       end
-
     end
     CIRCL = PassiveDNS::Provider::Circl
   end
