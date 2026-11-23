@@ -78,6 +78,7 @@ Or use the included tool...
       -dcdopv uses all of the available passive dns database
       -dc use CIRCL
       -dd use DNSDB
+      -do use OSC
       -dp use PassiveTotal
       -dv use VirusTotal
       -dvp uses VirusTotal and PassiveTotal (for example)
