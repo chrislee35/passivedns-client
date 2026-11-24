@@ -1,4 +1,4 @@
-Copyright (c) 2013 chrislee35
+Copyright (c) 2013-2026 chrislee35
 
 MIT License
 

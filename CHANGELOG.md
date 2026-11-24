@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- A comment in `lib/passivedns/client.rb` said the code was released under the LGPL. The license is MIT, as in `LICENSE.txt` and the gemspec.
+
 ## 3.0.0 - 2026-11-23
 
 ### Breaking changes

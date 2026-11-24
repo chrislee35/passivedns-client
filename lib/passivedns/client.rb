@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # DESCRIPTION: queries passive DNS databases
-# This code is released under the LGPL: http://www.gnu.org/licenses/lgpl-3.0.txt
+# This code is released under the MIT license (see LICENSE.txt).
 # Please note that use of any passive dns database is subject to the terms of use of that passive dns database.  Use of this script in
 # violation of their terms is not encouraged in any way.  Also, please do not add any obfuscation to try to work around their terms of
 # service.  If you need special services, ask the providers for help/permission.
